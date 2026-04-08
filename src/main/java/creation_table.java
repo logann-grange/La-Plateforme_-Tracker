@@ -40,7 +40,7 @@ public class creation_table {
                 id SERIAL PRIMARY KEY,
                 student_id INT NOT NULL REFERENCES student(id) ON DELETE CASCADE,
                 subject VARCHAR(100) NOT NULL,
-                grade FLOAT NOT NULL CHECK ,
+                grade FLOAT NOT NULL ,
                 exam_date DATE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )

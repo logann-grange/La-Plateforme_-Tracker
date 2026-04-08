@@ -1,4 +1,4 @@
-package Vue;
+package Vue.Components;
 
 import java.util.regex.Pattern;
 
