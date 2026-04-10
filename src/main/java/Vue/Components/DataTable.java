@@ -1,0 +1,422 @@
+package Vue.Components;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Consumer;
+import javafx.scene.control.Alert;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.collections.FXCollections;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
+public class DataTable {
+    private final TableView<StudentRow> tableView;
+    private final VBox root;
+    private final int defaultPageSize;
+
+    private List<StudentRow> sourceRows;
+    private List<StudentRow> allRows;
+    private int currentPage;
+    private int pageSize;
+
+    private Consumer<StudentRow> onEdit;
+    private Consumer<StudentRow> onDelete;
+
+    public DataTable() {
+        this(10);
+    }
+
+    public DataTable(int pageSize) {
+        if (pageSize <= 0) {
+            throw new IllegalArgumentException("pageSize doit etre strictement positif.");
+        }
+
+        this.defaultPageSize = pageSize;
+        this.pageSize = pageSize;
+        this.currentPage = 1;
+        this.sourceRows = new ArrayList<>();
+        this.allRows = new ArrayList<>();
+        this.onEdit = row -> {
+        };
+        this.onDelete = row -> {
+        };
+
+        this.tableView = new TableView<>();
+        this.root = new VBox(12);
+
+        configureTable();
+        refreshPage();
+    }
+
+    public VBox build() {
+        return root;
+    }
+
+    public void setRows(List<StudentRow> rows) {
+        this.sourceRows = rows == null ? new ArrayList<>() : new ArrayList<>(rows);
+        this.allRows = new ArrayList<>(sourceRows);
+        this.currentPage = 1;
+        refreshPage();
+    }
+
+    public void setOnEdit(Consumer<StudentRow> onEdit) {
+        this.onEdit = onEdit == null ? row -> {
+        } : onEdit;
+    }
+
+    public void setOnDelete(Consumer<StudentRow> onDelete) {
+        this.onDelete = onDelete == null ? row -> {
+        } : onDelete;
+    }
+
+    public void setPageSize(int pageSize) {
+        if (pageSize <= 0) {
+            throw new IllegalArgumentException("pageSize doit etre strictement positif.");
+        }
+
+        this.pageSize = pageSize;
+        this.currentPage = 1;
+        refreshPage();
+    }
+
+    public void resetPageSize() {
+        this.pageSize = defaultPageSize;
+        this.currentPage = 1;
+        refreshPage();
+    }
+
+    public TableView<StudentRow> getTableView() {
+        return tableView;
+    }
+
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    public int getTotalPages() {
+        if (allRows.isEmpty()) {
+            return 1;
+        }
+        return (int) Math.ceil((double) allRows.size() / pageSize);
+    }
+
+    public void sortRows(String sortBy, String sortOrder) {
+        Comparator<StudentRow> comparator = buildComparator(sortBy, sortOrder);
+        allRows.sort(comparator);
+        currentPage = 1;
+        refreshPage();
+    }
+
+    public void applyFilterAndSort(List<String> selectedOptions, String sortBy, String sortOrder) {
+        List<String> safeOptions = selectedOptions == null ? List.of() : selectedOptions;
+        List<StudentRow> filteredRows = new ArrayList<>();
+
+        for (StudentRow row : sourceRows) {
+            if (matchesSelectedOptions(row, safeOptions)) {
+                filteredRows.add(row);
+            }
+        }
+
+        allRows = filteredRows;
+        allRows.sort(buildComparator(sortBy, sortOrder));
+        currentPage = 1;
+        refreshPage();
+    }
+
+    public void searchRows(String query) {
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase();
+
+        if (normalizedQuery.isEmpty()) {
+            allRows = new ArrayList<>(sourceRows);
+            currentPage = 1;
+            refreshPage();
+            return;
+        }
+
+        List<StudentRow> matchedRows = new ArrayList<>();
+        for (StudentRow row : sourceRows) {
+            if (matchesQuery(row, normalizedQuery)) {
+                matchedRows.add(row);
+            }
+        }
+
+        allRows = matchedRows;
+        currentPage = 1;
+        refreshPage();
+    }
+
+    private boolean matchesQuery(StudentRow row, String query) {
+        return String.valueOf(row.getId()).contains(query)
+            || row.getFirstName().toLowerCase().contains(query)
+            || row.getLastName().toLowerCase().contains(query)
+            || String.valueOf(row.getAge()).contains(query)
+            || String.valueOf(row.getGrade()).contains(query)
+            || row.getCreatedAt().toLowerCase().contains(query);
+    }
+
+    private Comparator<StudentRow> buildComparator(String sortBy, String sortOrder) {
+        Comparator<StudentRow> comparator;
+
+        if (sortBy == null || sortBy.isBlank()) {
+            comparator = Comparator.comparingInt(StudentRow::getId);
+        } else {
+            comparator = switch (sortBy.trim().toLowerCase()) {
+                case "nom" -> Comparator.comparing(
+                    StudentRow::getLastName,
+                    String.CASE_INSENSITIVE_ORDER
+                );
+                case "prenom" -> Comparator.comparing(
+                    StudentRow::getFirstName,
+                    String.CASE_INSENSITIVE_ORDER
+                );
+                case "age" -> Comparator.comparingInt(StudentRow::getAge);
+                case "moyenne" -> Comparator.comparingDouble(StudentRow::getGrade);
+                default -> Comparator.comparingInt(StudentRow::getId);
+            };
+        }
+
+        if (sortOrder != null && "decroissant".equalsIgnoreCase(sortOrder.trim())) {
+            comparator = comparator.reversed();
+        }
+
+        return comparator;
+    }
+
+    private boolean matchesSelectedOptions(StudentRow row, List<String> selectedOptions) {
+        if (selectedOptions.isEmpty()) {
+            return true;
+        }
+
+        for (String option : selectedOptions) {
+            if (!matchesOption(row, option)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean matchesOption(StudentRow row, String option) {
+        if (option == null || option.isBlank()) {
+            return true;
+        }
+
+        String normalized = option.trim().toLowerCase();
+
+        if (normalized.contains("majeur")) {
+            return row.getAge() >= 18;
+        }
+
+        if (normalized.contains("mineur")) {
+            return row.getAge() < 18;
+        }
+
+        if (normalized.contains("excellent")) {
+            return row.getGrade() >= 16.0;
+        }
+
+        if (normalized.contains("admis") || normalized.contains(">=10") || normalized.contains("sup") && normalized.contains("10")) {
+            return row.getGrade() >= 10.0;
+        }
+
+        if (normalized.contains("echec") || normalized.contains("risque") || normalized.contains("<10") || normalized.contains("inf") && normalized.contains("10")) {
+            return row.getGrade() < 10.0;
+        }
+
+        return true;
+    }
+
+    private void configureTable() {
+        root.setAlignment(Pos.TOP_CENTER);
+        root.setFillWidth(true);
+
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        tableView.setPrefHeight(420);
+
+        TableColumn<StudentRow, Integer> idCol = new TableColumn<>("ID");
+        idCol.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getId()));
+
+        TableColumn<StudentRow, String> firstNameCol = new TableColumn<>("Prenom");
+        firstNameCol.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getFirstName()));
+
+        TableColumn<StudentRow, String> lastNameCol = new TableColumn<>("Nom");
+        lastNameCol.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getLastName()));
+
+        TableColumn<StudentRow, Integer> ageCol = new TableColumn<>("Age");
+        ageCol.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getAge()));
+
+        TableColumn<StudentRow, Double> gradeCol = new TableColumn<>("Moyenne");
+        gradeCol.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getGrade()));
+        gradeCol.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("%.2f", item));
+                }
+            }
+        });
+
+        TableColumn<StudentRow, String> createdAtCol = new TableColumn<>("Cree le");
+        createdAtCol.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getCreatedAt()));
+
+        TableColumn<StudentRow, Void> actionsCol = new TableColumn<>("Actions");
+        actionsCol.setSortable(false);
+        actionsCol.setReorderable(false);
+        actionsCol.setCellFactory(col -> new TableCell<>() {
+            private final Button editButton = new CustomButton("Modifier", 95, 28, "#4B5563").build();
+            private final Button deleteButton = new CustomButton("X", 34, 28, "#991B1B").build();
+            private final HBox buttons = new HBox(8, editButton, deleteButton);
+
+            {
+                buttons.setAlignment(Pos.CENTER);
+                editButton.setOnAction(event -> {
+                    StudentRow row = getCurrentRow();
+                    if (row != null) {
+                        onEdit.accept(row);
+                    }
+                });
+
+                deleteButton.setOnAction(event -> {
+                    StudentRow row = getCurrentRow();
+                    if (row != null && confirmDelete(row)) {
+                        onDelete.accept(row);
+                    }
+                });
+            }
+
+            private boolean confirmDelete(StudentRow row) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Confirmation de suppression");
+                alert.setHeaderText("Supprimer cet eleve ?");
+                alert.setContentText(
+                    row.getFirstName() + " " + row.getLastName() + " (ID " + row.getId() + ")"
+                );
+                return alert.showAndWait()
+                    .filter(ButtonType.OK::equals)
+                    .isPresent();
+            }
+
+            private StudentRow getCurrentRow() {
+                if (getIndex() < 0 || getIndex() >= getTableView().getItems().size()) {
+                    return null;
+                }
+                return getTableView().getItems().get(getIndex());
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : buttons);
+            }
+        });
+
+        tableView.getColumns().add(idCol);
+        tableView.getColumns().add(firstNameCol);
+        tableView.getColumns().add(lastNameCol);
+        tableView.getColumns().add(ageCol);
+        tableView.getColumns().add(gradeCol);
+        tableView.getColumns().add(createdAtCol);
+        tableView.getColumns().add(actionsCol);
+
+        root.getChildren().clear();
+        root.getChildren().add(tableView);
+    }
+
+    private void refreshPage() {
+        int totalPages = getTotalPages();
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+
+        int fromIndex = (currentPage - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, allRows.size());
+
+        List<StudentRow> pageRows = fromIndex < toIndex
+            ? allRows.subList(fromIndex, toIndex)
+            : List.of();
+
+        tableView.setItems(FXCollections.observableArrayList(pageRows));
+        renderPagination(totalPages);
+    }
+
+    private void renderPagination(int totalPages) {
+        PaginationBar paginationBar = new PaginationBar(currentPage, totalPages, 460, 44);
+        HBox paginationNode = paginationBar.build();
+
+        paginationBar.getPrevButton().setOnAction(event -> {
+            if (currentPage > 1) {
+                currentPage--;
+                refreshPage();
+            }
+        });
+
+        paginationBar.getNextButton().setOnAction(event -> {
+            if (currentPage < totalPages) {
+                currentPage++;
+                refreshPage();
+            }
+        });
+
+        if (root.getChildren().size() == 1) {
+            root.getChildren().add(paginationNode);
+        } else {
+            root.getChildren().set(1, paginationNode);
+        }
+    }
+
+    public static class StudentRow {
+        private final int id;
+        private final String firstName;
+        private final String lastName;
+        private final int age;
+        private final double grade;
+        private final String createdAt;
+
+        public StudentRow(int id, String firstName, String lastName, int age, double grade, String createdAt) {
+            this.id = id;
+            this.firstName = firstName == null ? "" : firstName;
+            this.lastName = lastName == null ? "" : lastName;
+            this.age = age;
+            this.grade = grade;
+            this.createdAt = createdAt == null ? "" : createdAt;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public double getGrade() {
+            return grade;
+        }
+
+        public String getCreatedAt() {
+            return createdAt;
+        }
+    }
+}

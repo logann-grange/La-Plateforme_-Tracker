@@ -1,6 +1,7 @@
 import Vue.Components.Windows;
 import Vue.Pages.AuthChoiceView;
 import Vue.Pages.LoginView;
+import Vue.Pages.MainDashboardView;
 import Vue.Pages.Register;
 import javafx.application.Application;
 import javafx.scene.image.Image;
@@ -52,6 +53,16 @@ public class MainApp extends Application {
                 String username = view.getUsernameField().getText();
                 String password = view.getPasswordField().getText();
                 System.out.println("Email saisi: " + username + " | Mot de passe saisi: " + password);
+
+                MainDashboardView dashboardView = new MainDashboardView();
+                dashboardView.getRoot().setStyle(appWindow.getBackgroundStyle());
+                dashboardView.getReturnButton().setOnAction(backEvent -> {
+                    scene.setRoot(authChoiceView.getRoot());
+                    stage.setTitle("Tracker Etudiant");
+                });
+
+                scene.setRoot(dashboardView.getRoot());
+                stage.setTitle("Tracker Etudiant - Tableau de bord");
             });
 
             view.getReturnButton().setOnAction(returnEvent -> {

@@ -1,0 +1,74 @@
+package Vue.Components;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+
+public class ActionBar {
+    private final Button addButton;
+    private final Button statisticsButton;
+    private final Button importButton;
+    private final Button exportButton;
+    private final TextField searchField;
+
+    public ActionBar() {
+        this.addButton = new CustomButton("Ajouter un eleve", 160, 38, "#2F6B5C").build();
+        this.statisticsButton = new CustomButton("Statistiques", 130, 38, "#6F5A3A").build();
+        this.importButton = new CustomButton("Importer", 110, 38, "#475569").build();
+        this.exportButton = new CustomButton("Exporter", 110, 38, "#475569").build();
+        this.searchField = new SearchBar("Rechercher un eleve...").build();
+    }
+
+    public HBox build() {
+        HBox root = new HBox(12);
+        root.setAlignment(Pos.CENTER_LEFT);
+        root.setPadding(new Insets(14, 16, 14, 16));
+        root.setStyle(
+            "-fx-background-color: #F8FAFC;"
+                + "-fx-border-color: #D1D9E2;"
+                + "-fx-border-width: 0 0 1 0;"
+        );
+
+        HBox leftBox = new HBox(10, addButton);
+        leftBox.setAlignment(Pos.CENTER_LEFT);
+
+        HBox centerBox = new HBox(searchField);
+        centerBox.setAlignment(Pos.CENTER);
+        HBox.setHgrow(centerBox, Priority.ALWAYS);
+        searchField.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(searchField, Priority.ALWAYS);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox rightBox = new HBox(10, statisticsButton, importButton, exportButton);
+        rightBox.setAlignment(Pos.CENTER_RIGHT);
+
+        root.getChildren().addAll(leftBox, spacer, centerBox, rightBox);
+        return root;
+    }
+
+    public Button getAddButton() {
+        return addButton;
+    }
+
+    public Button getStatisticsButton() {
+        return statisticsButton;
+    }
+
+    public Button getImportButton() {
+        return importButton;
+    }
+
+    public Button getExportButton() {
+        return exportButton;
+    }
+
+    public TextField getSearchField() {
+        return searchField;
+    }
+}
