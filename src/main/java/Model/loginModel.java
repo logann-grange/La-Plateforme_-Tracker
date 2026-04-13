@@ -8,14 +8,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class loginModel {
 
-    private static final String URL  = "jdbc:postgresql://localhost:5432/Tracker";
+    private static final String URL  = "jdbc:postgresql://localhost:5432/tracker";
     private static final String USER = "postgres";
-    private static final String PASS = "";
+    private static final String PASS = "klemzz135";
     private static final String PEPPER = System.getenv("PASSWORD_PEPPER");
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12); // coût = 12
 
     public void createUser(String firstName, String lastName, String mail, String password) {
-        String request = "INSERT INTO student (first_name, last_name, mail, password) VALUES (?, ?, ?, ?)";
+        String request = "INSERT INTO users (first_name, last_name, mail, password) VALUES (?, ?, ?, ?)";
         
         password = securePassword(password);
 

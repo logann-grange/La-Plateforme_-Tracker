@@ -1,3 +1,6 @@
+import Controller.LoginController;
+import Controller.registerController;
+import Model.loginModel;
 import Vue.Components.Windows;
 import Vue.Pages.AuthChoiceView;
 import Vue.Pages.LoginView;
@@ -23,18 +26,7 @@ public class MainApp extends Application {
             Register view = new Register();
             view.getRoot().setStyle(appWindow.getBackgroundStyle());
 
-            view.getRegisterButton().setOnAction(registerEvent -> {
-                String email = view.getEmailField().getText();
-                String password = view.getPasswordField().getText();
-                String confirmPassword = view.getConfirmPasswordField().getText();
-                String firstName = view.getFirstNameField().getText();
-                String lastName = view.getLastNameField().getText();
-                System.out.println("Email saisi: " + email);
-                System.out.println("Mot de passe saisi: " + password);
-                System.out.println("Confirmation du mot de passe: " + confirmPassword);
-                System.out.println("Prénom saisi: " + firstName);
-                System.out.println("Nom saisi: " + lastName);
-            });
+            new registerController(view, new loginModel(), scene, authChoiceView);
 
             view.getReturnButton().setOnAction(returnEvent -> {
                 scene.setRoot(authChoiceView.getRoot());
@@ -49,21 +41,7 @@ public class MainApp extends Application {
             LoginView view = new LoginView();
             view.getRoot().setStyle(appWindow.getBackgroundStyle());
 
-            view.getLoginButton().setOnAction(loginEvent -> {
-                String username = view.getUsernameField().getText();
-                String password = view.getPasswordField().getText();
-                System.out.println("Email saisi: " + username + " | Mot de passe saisi: " + password);
-
-                MainDashboardView dashboardView = new MainDashboardView();
-                dashboardView.getRoot().setStyle(appWindow.getBackgroundStyle());
-                dashboardView.getReturnButton().setOnAction(backEvent -> {
-                    scene.setRoot(authChoiceView.getRoot());
-                    stage.setTitle("Tracker Etudiant");
-                });
-
-                scene.setRoot(dashboardView.getRoot());
-                stage.setTitle("Tracker Etudiant - Tableau de bord");
-            });
+            new LoginController(view, new loginModel(), scene, new MainDashboardView());
 
             view.getReturnButton().setOnAction(returnEvent -> {
                 scene.setRoot(authChoiceView.getRoot());
