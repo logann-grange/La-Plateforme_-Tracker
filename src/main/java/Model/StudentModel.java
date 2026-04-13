@@ -11,11 +11,14 @@ import java.util.List;
 public class StudentModel {
 
     String selectRequest;
+    List<Object> selectParams;
 
     public StudentModel() {
         this.selectRequest = "";
+        this.selectParams = new ArrayList<>();
     }
-    //Ajouter un élève
+
+    // Ajouter un élève
     public void addStudent(String firstName, String lastName, int age, float grade) {
         String request = "INSERT INTO student (first_name, last_name, age, grade) VALUES (?, ?, ?, ?)";
 
@@ -27,18 +30,16 @@ public class StudentModel {
             stmt.setInt(3, age);
             stmt.setFloat(4, grade);
             stmt.executeUpdate();
-        } 
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // modifier un élève
+    // Modifier un élève
     public void updateStudent(int id, String firstName, String lastName, int age, float grade) {
         String request = "UPDATE student SET ";
         List<Object> params = new ArrayList<>();
 
-        //ajouter à la requete si les parametres ne sont pas vides
         if (!firstName.isEmpty()) {
             if (!params.isEmpty()) request += ", ";
             request += "first_name = ?";
@@ -63,7 +64,6 @@ public class StudentModel {
         request += " WHERE id = ?";
         params.add(id);
 
-        // connection à la BDD et execution de la requete
         try {
             Connection conn = DatabaseConnection.getInstance();
             PreparedStatement stmt = conn.prepareStatement(request);
@@ -76,71 +76,72 @@ public class StudentModel {
         }
     }
 
-    // Suppression d'un éleve
+    // Supprimer un élève
     public void deleteStudent(int id) {
-        //préparation de la requete
         String request = "DELETE FROM student WHERE id = ?";
-        // connection à la BDD et execution de la requete
         try {
             Connection conn = DatabaseConnection.getInstance();
             PreparedStatement stmt = conn.prepareStatement(request);
             stmt.setObject(1, id);
-            stmt.executeQuery();
+            stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    // Filtrer les élèves
     public String[] filter(int id, String firstName, String lastName, String age, String grade) {
-        List<Object> params = new ArrayList<>();
+        this.selectParams = new ArrayList<>();
         this.selectRequest = "SELECT * FROM student WHERE 1=1";
 
         // filtrage sur l'id
         if (id != 0) {
             this.selectRequest += " AND id = ?";
-            params.add(id);
+            this.selectParams.add(id);
         }
         // filtrage sur le prénom
         if (firstName != null && !firstName.isEmpty()) {
             this.selectRequest += " AND first_name = ?";
-            params.add(firstName);
+            this.selectParams.add(firstName);
         }
         // filtrage sur le nom
         if (lastName != null && !lastName.isEmpty()) {
             this.selectRequest += " AND last_name = ?";
-            params.add(lastName);
+            this.selectParams.add(lastName);
         }
         // filtrage sur l'âge
+        if (age != null && !age.isEmpty()) {
             if (age.startsWith("<")) {
                 this.selectRequest += " AND age < ?";
-                params.add(Integer.parseInt(age.substring(1).trim()));
+                this.selectParams.add(Integer.parseInt(age.substring(1).trim()));
             } else if (age.startsWith(">")) {
                 this.selectRequest += " AND age > ?";
-                params.add(Integer.parseInt(age.substring(1).trim()));
+                this.selectParams.add(Integer.parseInt(age.substring(1).trim()));
             } else {
                 this.selectRequest += " AND age = ?";
-                params.add(Integer.parseInt(age.substring(1).trim()));
+                this.selectParams.add(Integer.parseInt(age.trim()));
+            }
         }
         // filtrage sur la moyenne
         if (grade != null && !grade.isEmpty()) {
             if (grade.startsWith("<")) {
                 this.selectRequest += " AND grade < ?";
-                params.add(Float.parseFloat(grade.substring(1).trim()));
+                this.selectParams.add(Float.parseFloat(grade.substring(1).trim()));
             } else if (grade.startsWith(">")) {
                 this.selectRequest += " AND grade > ?";
-                params.add(Float.parseFloat(grade.substring(1).trim()));
+                this.selectParams.add(Float.parseFloat(grade.substring(1).trim()));
             } else {
                 this.selectRequest += " AND grade = ?";
-                params.add(Float.parseFloat(grade.substring(1).trim()));
+                this.selectParams.add(Float.parseFloat(grade.trim()));
             }
         }
+
         List<String> results = new ArrayList<>();
-        // connection à la BDD et execution de la requete
         try {
             Connection conn = DatabaseConnection.getInstance();
             PreparedStatement stmt = conn.prepareStatement(this.selectRequest);
-            for (int i = 0; i < params.size(); i++) {
-                stmt.setObject(i + 1, params.get(i));
+            for (int i = 0; i < this.selectParams.size(); i++) {
+                stmt.setObject(i + 1, this.selectParams.get(i));
             }
 
             ResultSet rs = stmt.executeQuery();
@@ -163,6 +164,7 @@ public class StudentModel {
         return results.toArray(new String[0]);
     }
 
+    // Trier les élèves (avec ou sans filtre préalable)
     public String[] sort(String column, int order) {
         if (this.selectRequest.isEmpty()) {
             this.selectRequest = "SELECT * FROM student";
@@ -171,12 +173,16 @@ public class StudentModel {
         String[] tabOrder = {"", "ASC", "DESC"};
         String strOrder = tabOrder[order];
 
-        this.selectRequest += " ORDER BY " + column + " " + strOrder;
+        String query = this.selectRequest + " ORDER BY " + column + " " + strOrder;
 
         List<String> results = new ArrayList<>();
         try {
             Connection conn = DatabaseConnection.getInstance();
-            PreparedStatement stmt = conn.prepareStatement(this.selectRequest);
+            PreparedStatement stmt = conn.prepareStatement(query);
+
+            for (int i = 0; i < this.selectParams.size(); i++) {
+                stmt.setObject(i + 1, this.selectParams.get(i));
+            }
 
             ResultSet rs = stmt.executeQuery();
             ResultSetMetaData meta = rs.getMetaData();
@@ -194,18 +200,23 @@ public class StudentModel {
             e.printStackTrace();
         }
 
+        // Reset après exécution
+        this.selectRequest = "";
+        this.selectParams = new ArrayList<>();
+
         return results.toArray(new String[0]);
     }
 
-
-
-    //Test
+    // Test
     public static void main(String[] args) {
         System.out.println("test main");
         StudentModel model = new StudentModel();
-        //model.addStudent("A", "B", 66, 5);
-        //model.updateStudent(1, "test3", "TEST3", 0, 0);
-        //System.out.println(Arrays.toString(model.filter(0, "", "", ">50", "")));
+
+        // Trier sans filtre
+        System.out.println(Arrays.toString(model.sort("age", 1)));
+
+        // Filtrer puis trier
+        model.filter(0, "", "", ">50", "");
         System.out.println(Arrays.toString(model.sort("grade", 1)));
     }
 }
