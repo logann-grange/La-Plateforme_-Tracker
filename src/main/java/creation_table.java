@@ -30,7 +30,11 @@ public class creation_table {
                 first_name VARCHAR(255) NOT NULL,
                 last_name VARCHAR(255) NOT NULL,
                 age INT NOT NULL,
+<<<<<<< HEAD
                 grade FLOAT NOT NULL CHECK ,
+=======
+                grade FLOAT NOT NULL,
+>>>>>>> origin/Logann
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """;
@@ -40,7 +44,7 @@ public class creation_table {
                 id SERIAL PRIMARY KEY,
                 student_id INT NOT NULL REFERENCES student(id) ON DELETE CASCADE,
                 subject VARCHAR(100) NOT NULL,
-                grade FLOAT NOT NULL ,
+                grade FLOAT NOT NULL,
                 exam_date DATE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
