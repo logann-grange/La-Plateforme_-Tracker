@@ -10,6 +10,11 @@ import java.util.List;
 
 public class StudentModel {
 
+    String selectRequest;
+
+    public StudentModel() {
+        this.selectRequest = "";
+    }
     //Ajouter un élève
     public void addStudent(String firstName, String lastName, int age, float grade) {
         String request = "INSERT INTO student (first_name, last_name, age, grade) VALUES (?, ?, ?, ?)";
@@ -88,52 +93,52 @@ public class StudentModel {
 
     public String[] filter(int id, String firstName, String lastName, String age, String grade) {
         List<Object> params = new ArrayList<>();
-        String request = "SELECT * FROM student WHERE 1=1";
+        this.selectRequest = "SELECT * FROM student WHERE 1=1";
 
         // filtrage sur l'id
         if (id != 0) {
-            request += " AND id = ?";
+            this.selectRequest += " AND id = ?";
             params.add(id);
         }
         // filtrage sur le prénom
         if (firstName != null && !firstName.isEmpty()) {
-            request += " AND first_name = ?";
+            this.selectRequest += " AND first_name = ?";
             params.add(firstName);
         }
         // filtrage sur le nom
         if (lastName != null && !lastName.isEmpty()) {
-            request += " AND last_name = ?";
+            this.selectRequest += " AND last_name = ?";
             params.add(lastName);
         }
         // filtrage sur l'âge
             if (age.startsWith("<")) {
-                request += " AND age < ?";
+                this.selectRequest += " AND age < ?";
                 params.add(Integer.parseInt(age.substring(1).trim()));
             } else if (age.startsWith(">")) {
-                request += " AND age > ?";
+                this.selectRequest += " AND age > ?";
                 params.add(Integer.parseInt(age.substring(1).trim()));
             } else {
-                request += " AND age = ?";
+                this.selectRequest += " AND age = ?";
                 params.add(Integer.parseInt(age.substring(1).trim()));
         }
         // filtrage sur la moyenne
         if (grade != null && !grade.isEmpty()) {
             if (grade.startsWith("<")) {
-                request += " AND grade < ?";
+                this.selectRequest += " AND grade < ?";
                 params.add(Float.parseFloat(grade.substring(1).trim()));
             } else if (grade.startsWith(">")) {
-                request += " AND grade > ?";
+                this.selectRequest += " AND grade > ?";
                 params.add(Float.parseFloat(grade.substring(1).trim()));
             } else {
-                request += " AND grade = ?";
+                this.selectRequest += " AND grade = ?";
                 params.add(Float.parseFloat(grade.substring(1).trim()));
             }
         }
         List<String> results = new ArrayList<>();
-
+        // connection à la BDD et execution de la requete
         try {
             Connection conn = DatabaseConnection.getInstance();
-            PreparedStatement stmt = conn.prepareStatement(request);
+            PreparedStatement stmt = conn.prepareStatement(this.selectRequest);
             for (int i = 0; i < params.size(); i++) {
                 stmt.setObject(i + 1, params.get(i));
             }
@@ -157,13 +162,50 @@ public class StudentModel {
 
         return results.toArray(new String[0]);
     }
+
+    public String[] sort(String column, int order) {
+        if (this.selectRequest.isEmpty()) {
+            this.selectRequest = "SELECT * FROM student";
+        }
+
+        String[] tabOrder = {"", "ASC", "DESC"};
+        String strOrder = tabOrder[order];
+
+        this.selectRequest += " ORDER BY " + column + " " + strOrder;
+
+        List<String> results = new ArrayList<>();
+        try {
+            Connection conn = DatabaseConnection.getInstance();
+            PreparedStatement stmt = conn.prepareStatement(this.selectRequest);
+
+            ResultSet rs = stmt.executeQuery();
+            ResultSetMetaData meta = rs.getMetaData();
+            int columnCount = meta.getColumnCount();
+
+            while (rs.next()) {
+                StringBuilder row = new StringBuilder();
+                for (int i = 1; i <= columnCount; i++) {
+                    if (i > 1) row.append(", ");
+                    row.append(meta.getColumnName(i)).append("=").append(rs.getString(i));
+                }
+                results.add(row.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return results.toArray(new String[0]);
+    }
+
+
+
     //Test
     public static void main(String[] args) {
         System.out.println("test main");
         StudentModel model = new StudentModel();
         //model.addStudent("A", "B", 66, 5);
         //model.updateStudent(1, "test3", "TEST3", 0, 0);
-        System.out.println(Arrays.toString(model.filter(0, "", "", ">50", "")));
+        //System.out.println(Arrays.toString(model.filter(0, "", "", ">50", "")));
+        System.out.println(Arrays.toString(model.sort("grade", 1)));
     }
-
 }
