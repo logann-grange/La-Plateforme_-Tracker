@@ -16,11 +16,11 @@ public class ActionBar {
     private final TextField searchField;
 
     public ActionBar() {
-        this.addButton = new CustomButton("Ajouter un eleve", 160, 38, "#2F6B5C").build();
-        this.statisticsButton = new CustomButton("Statistiques", 130, 38, "#6F5A3A").build();
-        this.importButton = new CustomButton("Importer", 110, 38, "#475569").build();
-        this.exportButton = new CustomButton("Exporter", 110, 38, "#475569").build();
-        this.searchField = new SearchBar("Rechercher un eleve...").build();
+        this.addButton = new CustomButton("Ajouter un eleve", 170, 38, "#0F766E").build();
+        this.statisticsButton = new CustomButton("Statistiques", 130, 38, "#0EA5E9").build();
+        this.importButton = new CustomButton("Importer", 110, 38, "#334155").build();
+        this.exportButton = new CustomButton("Exporter", 110, 38, "#334155").build();
+        this.searchField = new SearchBar("Rechercher un eleve...", 340, 40, "#FFFFFF", "#0F172A").build();
     }
 
     public HBox build() {
@@ -28,8 +28,8 @@ public class ActionBar {
         root.setAlignment(Pos.CENTER_LEFT);
         root.setPadding(new Insets(14, 16, 14, 16));
         root.setStyle(
-            "-fx-background-color: #F8FAFC;"
-                + "-fx-border-color: #D1D9E2;"
+            "-fx-background-color: linear-gradient(to right, #F8FAFC, #EFF6FF);"
+                + "-fx-border-color: #D8E2EE;"
                 + "-fx-border-width: 0 0 1 0;"
         );
 

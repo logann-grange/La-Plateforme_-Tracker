@@ -28,14 +28,14 @@ public class Register {
     private final TextField lastNameField;
 
     public Register() {
-        title = new LabelCustom("Inscription", 24, "#1A1A1A", true).build();
-        passwordField = new PasswordZone(250, 30, "Mot de passe").build();
-        confirmPasswordField = new PasswordZone(250, 30, "Confirmer le mot de passe").build();
-        firstNameField = new TextZone(250, 30, "Prénom").build();
-        lastNameField = new TextZone(250, 30, "Nom").build();
-        emailField = new TextZone(250, 30, "Email").build();
-        registerButton = new CustomButton("S'inscrire", 150, 40, "#10d551").build();
-        returnButton = new CustomButton("Retour", 150, 40, "#10d551").build();
+        title = new LabelCustom("Inscription", 28, "#0F172A", true).build();
+        passwordField = new PasswordZone(290, 38, "Mot de passe", "#FFFFFF", "#0F172A", "#CBD5E1").build();
+        confirmPasswordField = new PasswordZone(290, 38, "Confirmer le mot de passe", "#FFFFFF", "#0F172A", "#CBD5E1").build();
+        firstNameField = new TextZone(290, 38, "Prénom", "#FFFFFF", "#0F172A", "#CBD5E1").build();
+        lastNameField = new TextZone(290, 38, "Nom", "#FFFFFF", "#0F172A", "#CBD5E1").build();
+        emailField = new TextZone(290, 38, "Email", "#FFFFFF", "#0F172A", "#CBD5E1").build();
+        registerButton = new CustomButton("S'inscrire", 170, 40, "#0F766E").build();
+        returnButton = new CustomButton("Retour", 120, 36, "#334155").build();
         errorLabel = new LabelCustom("", 12, "#D92D20", false).build();
         registerButton.setMaxWidth(Region.USE_PREF_SIZE);
         returnButton.setMaxWidth(Region.USE_PREF_SIZE);
@@ -51,6 +51,14 @@ public class Register {
         VBox formBox = new VBox(16);
         formBox.setAlignment(Pos.CENTER);
         formBox.setFillWidth(false);
+        formBox.setPadding(new Insets(22));
+        formBox.setStyle(
+            "-fx-background-color: rgba(255,255,255,0.88);"
+                + "-fx-border-color: #DDE7F3;"
+                + "-fx-border-radius: 14;"
+                + "-fx-background-radius: 14;"
+                + "-fx-effect: dropshadow(gaussian, rgba(15,23,42,0.12), 20, 0.15, 0, 6);"
+        );
         formBox.getChildren().addAll(title, emailField, passwordField, confirmPasswordField, firstNameField, lastNameField, registerButton, errorLabel);
 
         root = new BorderPane();

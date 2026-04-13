@@ -30,14 +30,20 @@ public class PaginationBar {
         HBox container = new HBox(15);
         container.setAlignment(Pos.CENTER);
         container.setPrefSize(width, height);
-        container.setStyle("-fx-padding: 10;");
+        container.setStyle(
+            "-fx-padding: 8 10;"
+                + "-fx-background-color: #DCEBFF;"
+                + "-fx-border-color: #A4C4EA;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 10;"
+        );
 
-        prevButton = new CustomButton("< Precedent", 110, 30, "#475569").build();
+        prevButton = new CustomButton("< Precedent", 120, 32, "#1D4ED8").build();
         prevButton.setDisable(currentPage <= 1);
 
-        pageLabel = new LabelCustom("Page " + currentPage + " / " + totalPages, 14, "#1A1A1A", false).build();
+        pageLabel = new LabelCustom("Page " + currentPage + " / " + totalPages, 14, "#1E3A8A", true).build();
 
-        nextButton = new CustomButton("Suivant >", 110, 30, "#475569").build();
+        nextButton = new CustomButton("Suivant >", 120, 32, "#1D4ED8").build();
         nextButton.setDisable(currentPage >= totalPages);
 
         container.getChildren().addAll(prevButton, pageLabel, nextButton);

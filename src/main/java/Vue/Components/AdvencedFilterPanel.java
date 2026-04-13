@@ -5,7 +5,6 @@ import java.util.List;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
 import javafx.scene.layout.VBox;
 
 public class AdvencedFilterPanel {
@@ -15,8 +14,6 @@ public class AdvencedFilterPanel {
     private final double width;
     private final double height;
 
-    private ComboBox<String> sortByMenu;
-    private ComboBox<String> sortOrderMenu;
     private Button applyButton;
     private final List<CheckBox> optionCheckBoxes;
 
@@ -39,10 +36,11 @@ public class AdvencedFilterPanel {
         panel.setPrefSize(width, height);
         panel.setStyle(
             "-fx-background-color: " + backgroundColor + ";"
-                + "-fx-border-color: #CFCFCF;"
-                + "-fx-border-radius: 8;"
-                + "-fx-background-radius: 8;"
-                + "-fx-padding: 15;"
+                + "-fx-border-color: #D8E2EE;"
+                + "-fx-border-radius: 12;"
+                + "-fx-background-radius: 12;"
+                + "-fx-padding: 16;"
+                + "-fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 14, 0.1, 0, 4);"
         );
 
         optionCheckBoxes.clear();
@@ -52,32 +50,13 @@ public class AdvencedFilterPanel {
             checkBox.setStyle(
                 "-fx-text-fill: " + textColor + ";"
                     + "-fx-font-size: 13;"
+                    + "-fx-font-weight: 600;"
             );
             optionCheckBoxes.add(checkBox);
             panel.getChildren().add(checkBox);
         }
 
-        panel.getChildren().add(new LabelCustom("Tri par", 13, textColor, true).build());
-        sortByMenu = new dropDownMenu(
-            new String[] {"Nom", "Prenom", "Age", "Moyenne"},
-            "#FFFFFF",
-            textColor,
-            width - 30,
-            36
-        ).build();
-        panel.getChildren().add(sortByMenu);
-
-        panel.getChildren().add(new LabelCustom("Ordre", 13, textColor, true).build());
-        sortOrderMenu = new dropDownMenu(
-            new String[] {"Croissant", "Decroissant"},
-            "#FFFFFF",
-            textColor,
-            width - 30,
-            36
-        ).build();
-        panel.getChildren().add(sortOrderMenu);
-
-        applyButton = new CustomButton("Appliquer", 120, 34, "#0A84FF").build();
+        applyButton = new CustomButton("Appliquer", 130, 36, "#0F766E").build();
         panel.getChildren().add(applyButton);
 
         return panel;
@@ -97,14 +76,6 @@ public class AdvencedFilterPanel {
         return selectedOptions;
     }
 
-    public String getSelectedSortBy() {
-        return sortByMenu == null ? null : sortByMenu.getValue();
-    }
-
-    public String getSelectedSortOrder() {
-        return sortOrderMenu == null ? null : sortOrderMenu.getValue();
-    }
-
     public Button getApplyButton() {
         return applyButton;
     }
@@ -115,11 +86,7 @@ public class AdvencedFilterPanel {
         }
 
         applyButton.setOnAction(event -> {
-            dataTable.applyFilterAndSort(
-                getSelectedOptions(),
-                getSelectedSortBy(),
-                getSelectedSortOrder()
-            );
+            dataTable.applyFilters(getSelectedOptions());
         });
     }
     

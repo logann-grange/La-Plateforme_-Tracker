@@ -32,10 +32,11 @@ public class dropDownMenu {
         comboBox.setStyle(
             "-fx-background-color: " + backgroundColor + ";"
                 + "-fx-text-fill: " + textColor + ";"
-                + "-fx-border-color: #CFCFCF;"
-                + "-fx-border-radius: 8;"
-                + "-fx-background-radius: 8;"
+                + "-fx-border-color: #CBD5E1;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 10;"
                 + "-fx-font-size: 13;"
+                + "-fx-padding: 4 8;"
         );
 
         if (options.length > 0) {

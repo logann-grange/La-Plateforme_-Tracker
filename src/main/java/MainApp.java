@@ -13,7 +13,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) {
         AuthChoiceView authChoiceView = new AuthChoiceView();
-        Windows appWindow = new Windows(1280, 800, "#1d60e7ed");
+        Windows appWindow = new Windows(1280, 800, "#D7E8FF");
         authChoiceView.getRoot().setStyle(appWindow.getBackgroundStyle());
 
         Scene scene = new Scene(authChoiceView.getRoot(), appWindow.getWidth(), appWindow.getHeight());

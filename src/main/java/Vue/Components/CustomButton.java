@@ -27,10 +27,14 @@ public class CustomButton {
         button.setStyle(
             "-fx-background-color: " + backgroundColor + ";"
                 + "-fx-text-fill: " + textColor + ";"
-                + "-fx-font-size: 14;"
-                + "-fx-border-radius: 8;"
-                + "-fx-background-radius: 8;"
+                + "-fx-font-size: 13;"
+                + "-fx-font-weight: 700;"
+                + "-fx-border-color: transparent;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 10;"
+                + "-fx-padding: 8 14;"
                 + "-fx-cursor: hand;"
+                + "-fx-effect: dropshadow(gaussian, rgba(15,23,42,0.12), 10, 0.2, 0, 2);"
         );
         return button;
     }

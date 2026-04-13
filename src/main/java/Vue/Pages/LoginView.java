@@ -25,12 +25,12 @@ public class LoginView {
 	private final Label errorLabel;
 
 	public LoginView() {
-		Label title = new LabelCustom("Connexion", 24, "#1A1A1A", true).build();
+		Label title = new LabelCustom("Connexion", 28, "#0F172A", true).build();
 
-		usernameField = new TextZone(250, 30, "Email").build();
-		passwordField = new PasswordZone(250, 30, "Mot de passe").build();
-		loginButton = new CustomButton("Se connecter", 110, 30, "#10d551").build();
-        returnButton = new CustomButton("Retour", 110, 30, "#10d551").build();
+		usernameField = new TextZone(290, 38, "Email", "#FFFFFF", "#0F172A", "#CBD5E1").build();
+		passwordField = new PasswordZone(290, 38, "Mot de passe", "#FFFFFF", "#0F172A", "#CBD5E1").build();
+		loginButton = new CustomButton("Se connecter", 150, 38, "#0F766E").build();
+        returnButton = new CustomButton("Retour", 120, 36, "#334155").build();
 		usernameField.setMaxWidth(Region.USE_PREF_SIZE);
 		passwordField.setMaxWidth(Region.USE_PREF_SIZE);
 		loginButton.setMaxWidth(Region.USE_PREF_SIZE);
@@ -42,6 +42,14 @@ public class LoginView {
 		VBox formBox = new VBox(12);
 		formBox.setAlignment(Pos.CENTER);
 		formBox.setFillWidth(false);
+		formBox.setPadding(new Insets(22));
+		formBox.setStyle(
+			"-fx-background-color: rgba(255,255,255,0.88);"
+				+ "-fx-border-color: #DDE7F3;"
+				+ "-fx-border-radius: 14;"
+				+ "-fx-background-radius: 14;"
+				+ "-fx-effect: dropshadow(gaussian, rgba(15,23,42,0.12), 20, 0.15, 0, 6);"
+		);
 		formBox.getChildren().addAll(title, usernameField, passwordField, loginButton, errorLabel);
 
 		HBox topBar = new HBox(returnButton);
