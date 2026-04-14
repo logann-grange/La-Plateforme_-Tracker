@@ -65,7 +65,8 @@ public class GradeModel {
                 results.add(row.toString());
             }
 
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -121,7 +122,22 @@ public class GradeModel {
                 stmt.setObject(i + 1, params.get(i));
             }
             stmt.executeUpdate();
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Supprimer une note
+    public void deleteStudent(int id) {
+        String request = "DELETE FROM grade WHERE id = ?";
+        try {
+            Connection conn = DatabaseConnection.getInstance();
+            PreparedStatement stmt = conn.prepareStatement(request);
+            stmt.setObject(1, id);
+            stmt.executeUpdate();
+        } 
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
