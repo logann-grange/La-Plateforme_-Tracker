@@ -7,7 +7,7 @@ import java.sql.Statement;
 public class creation_table {
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/tracker";
     private static final String DB_USER = "postgres";
-    private static final String DB_PASSWORD = "mdp123";
+    private static final String DB_PASSWORD = "klemzz135";
     private static final String ADMIN_DB_URL = "jdbc:postgresql://localhost:5432/postgres";
 
     public static void main(String[] args) {
@@ -30,7 +30,7 @@ public class creation_table {
                 first_name VARCHAR(255) NOT NULL,
                 last_name VARCHAR(255) NOT NULL,
                 age INT NOT NULL,
-                grade FLOAT NOT NULL CHECK ,
+                grade FLOAT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """;
@@ -40,7 +40,7 @@ public class creation_table {
                 id SERIAL PRIMARY KEY,
                 student_id INT NOT NULL REFERENCES student(id) ON DELETE CASCADE,
                 subject VARCHAR(100) NOT NULL,
-                grade FLOAT NOT NULL ,
+                grade FLOAT NOT NULL,
                 exam_date DATE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
