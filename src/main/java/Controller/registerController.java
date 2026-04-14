@@ -38,7 +38,18 @@ public class registerController {
             vue.showError("Les mots de passe ne correspondent pas.");
             return;
         }
-        model.createUser(firstName, lastName, email, password);
+
+        boolean created = model.createUser(firstName, lastName, email, password);
+        if (!created) {
+            String dbError = model.getLastErrorMessage();
+            if (dbError == null || dbError.isBlank()) {
+                vue.showError("Echec d'inscription: verifie la connexion PostgreSQL ou les doublons (email/prenom).");
+            } else {
+                vue.showError("Echec d'inscription: " + dbError);
+            }
+            return;
+        }
+
         System.out.println("Utilisateur créé !");
         scene.setRoot(authChoiceView.getRoot());
     }

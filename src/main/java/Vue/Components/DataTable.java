@@ -19,11 +19,14 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 
 public class DataTable {
     private static final double TABLE_ROW_HEIGHT = 36;
     private static final double TABLE_HEADER_HEIGHT = 30;
+    private static final double TABLE_VERTICAL_BUFFER = 24;
 
     private final TableView<StudentRow> tableView;
     private final VBox root;
@@ -40,6 +43,7 @@ public class DataTable {
 
     private Consumer<StudentRow> onEdit;
     private Consumer<StudentRow> onDelete;
+    private Consumer<StudentRow> onGradeClick;
 
     public DataTable() {
         this(10);
@@ -62,6 +66,8 @@ public class DataTable {
         this.onEdit = row -> {
         };
         this.onDelete = row -> {
+        };
+        this.onGradeClick = row -> {
         };
 
         this.tableView = new TableView<>();
@@ -89,6 +95,11 @@ public class DataTable {
     public void setOnDelete(Consumer<StudentRow> onDelete) {
         this.onDelete = onDelete == null ? row -> {
         } : onDelete;
+    }
+
+    public void setOnGradeClick(Consumer<StudentRow> onGradeClick) {
+        this.onGradeClick = onGradeClick == null ? row -> {
+        } : onGradeClick;
     }
 
     public void setPageSize(int pageSize) {
@@ -231,6 +242,18 @@ public class DataTable {
 
         String normalized = option.trim().toLowerCase();
 
+        if (normalized.contains("18-25")) {
+            return row.getAge() >= 18 && row.getAge() <= 25;
+        }
+
+        if (normalized.contains("26-35")) {
+            return row.getAge() >= 26 && row.getAge() <= 35;
+        }
+
+        if (normalized.contains("36-45")) {
+            return row.getAge() >= 36 && row.getAge() <= 45;
+        }
+
         if (normalized.contains("majeur")) {
             return row.getAge() >= 18;
         }
@@ -257,25 +280,33 @@ public class DataTable {
     private void configureTable() {
         root.setAlignment(Pos.TOP_CENTER);
         root.setFillWidth(true);
+        root.setMaxWidth(Double.MAX_VALUE);
         root.setStyle(
             "-fx-background-color: linear-gradient(to bottom, #E7F0FF, #D9E8FF);"
                 + "-fx-border-color: #A8C6EC;"
                 + "-fx-border-radius: 12;"
                 + "-fx-background-radius: 12;"
-                + "-fx-padding: 10;"
+            + "-fx-padding: 4 4 6 4;"
         );
+        applyRoundedClip(root, 12);
 
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         tableView.setFixedCellSize(TABLE_ROW_HEIGHT);
-        tableView.setPrefHeight(TABLE_HEADER_HEIGHT + (pageSize * TABLE_ROW_HEIGHT));
+        tableView.setMaxWidth(Double.MAX_VALUE);
+        tableView.prefWidthProperty().bind(root.widthProperty().subtract(12));
+        tableView.setPrefHeight(TABLE_HEADER_HEIGHT + (pageSize * TABLE_ROW_HEIGHT) + TABLE_VERTICAL_BUFFER);
         tableView.addEventFilter(ScrollEvent.ANY, ScrollEvent::consume);
         tableView.setStyle(
             "-fx-background-color: #EAF3FF;"
                 + "-fx-border-color: #95B9E8;"
                 + "-fx-border-radius: 12;"
                 + "-fx-background-radius: 12;"
-                + "-fx-padding: 6;"
+                + "-fx-background-insets: 0;"
+            + "-fx-padding: 2;"
         );
+        tableView.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+            hideTableScrollBars();
+        });
         hideTableScrollBars();
 
         TableColumn<StudentRow, Integer> idCol = new TableColumn<>("ID");
@@ -298,8 +329,19 @@ public class DataTable {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
+                    setStyle("-fx-alignment: CENTER;");
+                    setOnMouseClicked(null);
                 } else {
                     setText(String.format("%.2f", item));
+                    setStyle("-fx-alignment: CENTER; -fx-text-fill: #0369A1; -fx-underline: true; -fx-cursor: hand;");
+                    setOnMouseClicked(event -> {
+                        if (event.getClickCount() == 1 && !isEmpty()) {
+                            StudentRow row = getTableRow() == null ? null : getTableRow().getItem();
+                            if (row != null) {
+                                onGradeClick.accept(row);
+                            }
+                        }
+                    });
                 }
             }
         });
@@ -393,6 +435,7 @@ public class DataTable {
 
         tableView.setItems(FXCollections.observableArrayList(pageRows));
         updateTableHeight(pageRows.size());
+        tableView.refresh();
         hideTableScrollBars();
         renderPagination(totalPages);
     }
@@ -403,16 +446,38 @@ public class DataTable {
                 if (node instanceof ScrollBar scrollBar) {
                     scrollBar.setVisible(false);
                     scrollBar.setManaged(false);
+                    scrollBar.setOpacity(0);
                     scrollBar.setPrefWidth(0);
                     scrollBar.setMaxWidth(0);
                     scrollBar.setMinWidth(0);
+
+                    for (Node child : scrollBar.lookupAll(".increment-button, .decrement-button, .increment-arrow, .decrement-arrow")) {
+                        child.setVisible(false);
+                        child.setManaged(false);
+                        child.setOpacity(0);
+                    }
                 }
             }
         });
     }
 
     private void updateTableHeight(int visibleRows) {
-        tableView.setPrefHeight(TABLE_HEADER_HEIGHT + (pageSize * TABLE_ROW_HEIGHT));
+        int displayedRows = Math.max(1, visibleRows);
+        double computedHeight = TABLE_HEADER_HEIGHT + (displayedRows * TABLE_ROW_HEIGHT) + TABLE_VERTICAL_BUFFER;
+        tableView.setPrefHeight(computedHeight);
+        tableView.setMinHeight(computedHeight);
+        tableView.setMaxHeight(computedHeight);
+        tableView.applyCss();
+        tableView.layout();
+    }
+
+    private void applyRoundedClip(Region region, double radius) {
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(radius * 2);
+        clip.setArcHeight(radius * 2);
+        clip.widthProperty().bind(region.widthProperty());
+        clip.heightProperty().bind(region.heightProperty());
+        region.setClip(clip);
     }
 
     private void renderPagination(int totalPages) {
