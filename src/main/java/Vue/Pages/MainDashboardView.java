@@ -8,14 +8,20 @@ import Vue.Components.CustomButton;
 import Vue.Components.DataTable;
 import Vue.Components.DataTable.StudentRow;
 import Vue.Components.LabelCustom;
+import Vue.Components.StatisticsPanel;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class MainDashboardView {
     private final BorderPane root;
@@ -27,15 +33,25 @@ public class MainDashboardView {
     public MainDashboardView() {
         root = new BorderPane();
         root.setPadding(new Insets(16));
+        root.setStyle("-fx-background-color: transparent;");
 
         returnButton = new CustomButton("Retour", 110, 34, "#475569").build();
-        Label title = new LabelCustom("Gestion des eleves", 22, "#1A1A1A", true).build();
+        Label title = new LabelCustom("Gestion des eleves", 24, "#0F172A", true).build();
 
         HBox titleBar = new HBox(12, returnButton, title);
         titleBar.setAlignment(Pos.CENTER_LEFT);
+        titleBar.setPadding(new Insets(0, 0, 6, 0));
 
         actionBar = new ActionBar();
         VBox topSection = new VBox(10, titleBar, actionBar.build());
+        topSection.setStyle(
+            "-fx-background-color: rgba(255,255,255,0.78);"
+                + "-fx-border-color: #D8E2EE;"
+                + "-fx-border-radius: 14;"
+                + "-fx-background-radius: 14;"
+                + "-fx-padding: 10;"
+                + "-fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 16, 0.1, 0, 4);"
+        );
 
         dataTable = new DataTable(8);
         dataTable.setRows(createMockRows());
@@ -54,6 +70,7 @@ public class MainDashboardView {
 
         HBox centerContent = new HBox(16, dataTable.build(), filterNode);
         centerContent.setAlignment(Pos.TOP_LEFT);
+        centerContent.setPadding(new Insets(12, 0, 0, 0));
         HBox.setHgrow(dataTable.build(), Priority.ALWAYS);
 
         wireActionBarEvents();
@@ -72,7 +89,7 @@ public class MainDashboardView {
 
     private void wireActionBarEvents() {
         actionBar.getAddButton().setOnAction(event ->
-            System.out.println("Action test: Ajouter un eleve")
+            openAddStudentWindow()
         );
 
         actionBar.getSearchField().setOnAction(event ->
@@ -83,7 +100,7 @@ public class MainDashboardView {
         );
 
         actionBar.getStatisticsButton().setOnAction(event ->
-            System.out.println("Action test: Ouvrir statistiques")
+            openStatisticsWindow()
         );
 
         actionBar.getImportButton().setOnAction(event ->
@@ -93,6 +110,132 @@ public class MainDashboardView {
         actionBar.getExportButton().setOnAction(event ->
             System.out.println("Action test: Exporter des donnees")
         );
+    }
+
+    private void openAddStudentWindow() {
+        Label title = new LabelCustom("Ajouter un eleve", 22, "#0F172A", true).build();
+        Label subtitle = new LabelCustom("Renseignez les informations de l'eleve", 13, "#64748B", false).build();
+
+        TextField firstNameField = new TextField();
+        firstNameField.setPromptText("Prenom");
+        firstNameField.setPrefWidth(230);
+        firstNameField.setStyle(
+            "-fx-background-color: #FFFFFF;"
+                + "-fx-border-color: #CBD5E1;"
+                + "-fx-border-radius: 8;"
+                + "-fx-background-radius: 8;"
+                + "-fx-padding: 8 10;"
+        );
+
+        TextField lastNameField = new TextField();
+        lastNameField.setPromptText("Nom");
+        lastNameField.setPrefWidth(230);
+        lastNameField.setStyle(
+            "-fx-background-color: #FFFFFF;"
+                + "-fx-border-color: #CBD5E1;"
+                + "-fx-border-radius: 8;"
+                + "-fx-background-radius: 8;"
+                + "-fx-padding: 8 10;"
+        );
+
+        TextField ageField = new TextField();
+        ageField.setPromptText("Age");
+        ageField.setPrefWidth(230);
+        ageField.setStyle(
+            "-fx-background-color: #FFFFFF;"
+                + "-fx-border-color: #CBD5E1;"
+                + "-fx-border-radius: 8;"
+                + "-fx-background-radius: 8;"
+                + "-fx-padding: 8 10;"
+        );
+
+        TextField gradeField = new TextField();
+        gradeField.setPromptText("Moyenne (0-20)");
+        gradeField.setPrefWidth(230);
+        gradeField.setStyle(
+            "-fx-background-color: #FFFFFF;"
+                + "-fx-border-color: #CBD5E1;"
+                + "-fx-border-radius: 8;"
+                + "-fx-background-radius: 8;"
+                + "-fx-padding: 8 10;"
+        );
+
+        GridPane form = new GridPane();
+        form.setHgap(12);
+        form.setVgap(12);
+        form.setAlignment(Pos.CENTER);
+        form.add(new LabelCustom("Prenom", 13, "#334155", true).build(), 0, 0);
+        form.add(firstNameField, 1, 0);
+        form.add(new LabelCustom("Nom", 13, "#334155", true).build(), 0, 1);
+        form.add(lastNameField, 1, 1);
+        form.add(new LabelCustom("Age", 13, "#334155", true).build(), 0, 2);
+        form.add(ageField, 1, 2);
+        form.add(new LabelCustom("Moyenne", 13, "#334155", true).build(), 0, 3);
+        form.add(gradeField, 1, 3);
+
+        Button cancelButton = new CustomButton("Annuler", 110, 34, "#64748B").build();
+        Button validateButton = new CustomButton("Valider", 110, 34, "#0A84FF").build();
+        HBox actions = new HBox(12, cancelButton, validateButton);
+        actions.setAlignment(Pos.CENTER);
+        actions.setPadding(new Insets(4, 0, 0, 0));
+
+        VBox formCard = new VBox(form);
+        formCard.setPadding(new Insets(14));
+        formCard.setStyle(
+            "-fx-background-color: #F8FAFC;"
+                + "-fx-border-color: #E2E8F0;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 10;"
+        );
+
+        VBox content = new VBox(14, title, subtitle, formCard, actions);
+        content.setPadding(new Insets(20));
+        content.setAlignment(Pos.TOP_CENTER);
+        content.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #FFFFFF, #F1F5F9);"
+        );
+
+        Stage addStudentStage = new Stage();
+        addStudentStage.setTitle("Ajouter un eleve");
+        addStudentStage.setScene(new Scene(content, 500, 380));
+        addStudentStage.setResizable(false);
+        addStudentStage.initModality(Modality.APPLICATION_MODAL);
+
+        if (root.getScene() != null) {
+            addStudentStage.initOwner(root.getScene().getWindow());
+        }
+
+        cancelButton.setOnAction(event -> addStudentStage.close());
+        validateButton.setOnAction(event -> {
+            System.out.println(
+                "Ajout eleve (a connecter): "
+                    + firstNameField.getText() + " "
+                    + lastNameField.getText() + ", age="
+                    + ageField.getText() + ", moyenne="
+                    + gradeField.getText()
+            );
+            addStudentStage.close();
+        });
+
+        addStudentStage.showAndWait();
+    }
+
+    private void openStatisticsWindow() {
+        StatisticsPanel statisticsPanel = new StatisticsPanel("Statistiques des eleves", "#FFFFFF", "#1A1A1A");
+        statisticsPanel.setRows(dataTable.getFilteredRows());
+
+        Scene statisticsScene = new Scene(statisticsPanel.build(), 620, 780);
+        Stage statisticsStage = new Stage();
+        statisticsStage.setTitle("Statistiques");
+        statisticsStage.setScene(statisticsScene);
+        statisticsStage.setResizable(false);
+        statisticsStage.initModality(Modality.APPLICATION_MODAL);
+
+        if (root.getScene() != null) {
+            statisticsStage.initOwner(root.getScene().getWindow());
+        }
+
+        statisticsStage.show();
     }
 
     private List<StudentRow> createMockRows() {

@@ -40,11 +40,12 @@ public class PasswordZone {
         passwordField.setStyle(
             "-fx-background-color: " + backgroundColor + ";"
                 + "-fx-text-fill: " + textColor + ";"
-                + "-fx-prompt-text-fill: #8A8A8A;"
+                + "-fx-prompt-text-fill: #94A3B8;"
                 + "-fx-border-color: " + borderColor + ";"
-                + "-fx-border-radius: 8;"
-                + "-fx-background-radius: 8;"
-                + "-fx-padding: 8 10 8 10;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 10;"
+                + "-fx-font-size: 13;"
+                + "-fx-padding: 9 12 9 12;"
         );
         return passwordField;
     }

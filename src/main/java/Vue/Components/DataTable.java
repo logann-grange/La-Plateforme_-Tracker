@@ -4,26 +4,37 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class DataTable {
+    private static final double TABLE_ROW_HEIGHT = 36;
+    private static final double TABLE_HEADER_HEIGHT = 30;
+
     private final TableView<StudentRow> tableView;
     private final VBox root;
     private final int defaultPageSize;
 
     private List<StudentRow> sourceRows;
     private List<StudentRow> allRows;
+    private List<String> activeFilters;
+    private String currentQuery;
+    private String currentSortBy;
+    private String currentSortOrder;
     private int currentPage;
     private int pageSize;
 
@@ -44,6 +55,10 @@ public class DataTable {
         this.currentPage = 1;
         this.sourceRows = new ArrayList<>();
         this.allRows = new ArrayList<>();
+        this.activeFilters = new ArrayList<>();
+        this.currentQuery = "";
+        this.currentSortBy = null;
+        this.currentSortOrder = null;
         this.onEdit = row -> {
         };
         this.onDelete = row -> {
@@ -62,9 +77,8 @@ public class DataTable {
 
     public void setRows(List<StudentRow> rows) {
         this.sourceRows = rows == null ? new ArrayList<>() : new ArrayList<>(rows);
-        this.allRows = new ArrayList<>(sourceRows);
         this.currentPage = 1;
-        refreshPage();
+        recomputeRows();
     }
 
     public void setOnEdit(Consumer<StudentRow> onEdit) {
@@ -101,6 +115,10 @@ public class DataTable {
         return currentPage;
     }
 
+    public List<StudentRow> getFilteredRows() {
+        return new ArrayList<>(allRows);
+    }
+
     public int getTotalPages() {
         if (allRows.isEmpty()) {
             return 1;
@@ -109,47 +127,49 @@ public class DataTable {
     }
 
     public void sortRows(String sortBy, String sortOrder) {
-        Comparator<StudentRow> comparator = buildComparator(sortBy, sortOrder);
-        allRows.sort(comparator);
+        this.currentSortBy = sortBy;
+        this.currentSortOrder = sortOrder;
         currentPage = 1;
-        refreshPage();
+        recomputeRows();
     }
 
     public void applyFilterAndSort(List<String> selectedOptions, String sortBy, String sortOrder) {
-        List<String> safeOptions = selectedOptions == null ? List.of() : selectedOptions;
-        List<StudentRow> filteredRows = new ArrayList<>();
-
-        for (StudentRow row : sourceRows) {
-            if (matchesSelectedOptions(row, safeOptions)) {
-                filteredRows.add(row);
-            }
-        }
-
-        allRows = filteredRows;
-        allRows.sort(buildComparator(sortBy, sortOrder));
+        this.activeFilters = selectedOptions == null ? new ArrayList<>() : new ArrayList<>(selectedOptions);
+        this.currentSortBy = sortBy;
+        this.currentSortOrder = sortOrder;
         currentPage = 1;
-        refreshPage();
+        recomputeRows();
+    }
+
+    public void applyFilters(List<String> selectedOptions) {
+        this.activeFilters = selectedOptions == null ? new ArrayList<>() : new ArrayList<>(selectedOptions);
+        currentPage = 1;
+        recomputeRows();
     }
 
     public void searchRows(String query) {
-        String normalizedQuery = query == null ? "" : query.trim().toLowerCase();
-
-        if (normalizedQuery.isEmpty()) {
-            allRows = new ArrayList<>(sourceRows);
-            currentPage = 1;
-            refreshPage();
-            return;
-        }
-
-        List<StudentRow> matchedRows = new ArrayList<>();
-        for (StudentRow row : sourceRows) {
-            if (matchesQuery(row, normalizedQuery)) {
-                matchedRows.add(row);
-            }
-        }
-
-        allRows = matchedRows;
+        this.currentQuery = query == null ? "" : query.trim().toLowerCase();
         currentPage = 1;
+        recomputeRows();
+    }
+
+    private void recomputeRows() {
+        List<StudentRow> computedRows = new ArrayList<>();
+
+        for (StudentRow row : sourceRows) {
+            if (!matchesSelectedOptions(row, activeFilters)) {
+                continue;
+            }
+
+            if (!currentQuery.isEmpty() && !matchesQuery(row, currentQuery)) {
+                continue;
+            }
+
+            computedRows.add(row);
+        }
+
+        computedRows.sort(buildComparator(currentSortBy, currentSortOrder));
+        allRows = computedRows;
         refreshPage();
     }
 
@@ -237,9 +257,26 @@ public class DataTable {
     private void configureTable() {
         root.setAlignment(Pos.TOP_CENTER);
         root.setFillWidth(true);
+        root.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #E7F0FF, #D9E8FF);"
+                + "-fx-border-color: #A8C6EC;"
+                + "-fx-border-radius: 12;"
+                + "-fx-background-radius: 12;"
+                + "-fx-padding: 10;"
+        );
 
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
-        tableView.setPrefHeight(420);
+        tableView.setFixedCellSize(TABLE_ROW_HEIGHT);
+        tableView.setPrefHeight(TABLE_HEADER_HEIGHT + (pageSize * TABLE_ROW_HEIGHT));
+        tableView.addEventFilter(ScrollEvent.ANY, ScrollEvent::consume);
+        tableView.setStyle(
+            "-fx-background-color: #EAF3FF;"
+                + "-fx-border-color: #95B9E8;"
+                + "-fx-border-radius: 12;"
+                + "-fx-background-radius: 12;"
+                + "-fx-padding: 6;"
+        );
+        hideTableScrollBars();
 
         TableColumn<StudentRow, Integer> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getId()));
@@ -329,6 +366,11 @@ public class DataTable {
         tableView.getColumns().add(createdAtCol);
         tableView.getColumns().add(actionsCol);
 
+        idCol.setStyle("-fx-alignment: CENTER;");
+        ageCol.setStyle("-fx-alignment: CENTER;");
+        gradeCol.setStyle("-fx-alignment: CENTER;");
+        actionsCol.setStyle("-fx-alignment: CENTER;");
+
         root.getChildren().clear();
         root.getChildren().add(tableView);
     }
@@ -342,15 +384,35 @@ public class DataTable {
             currentPage = 1;
         }
 
-        int fromIndex = (currentPage - 1) * pageSize;
+        int fromIndex = Math.min((currentPage - 1) * pageSize, allRows.size());
         int toIndex = Math.min(fromIndex + pageSize, allRows.size());
 
         List<StudentRow> pageRows = fromIndex < toIndex
-            ? allRows.subList(fromIndex, toIndex)
+            ? new ArrayList<>(allRows.subList(fromIndex, toIndex))
             : List.of();
 
         tableView.setItems(FXCollections.observableArrayList(pageRows));
+        updateTableHeight(pageRows.size());
+        hideTableScrollBars();
         renderPagination(totalPages);
+    }
+
+    private void hideTableScrollBars() {
+        Platform.runLater(() -> {
+            for (Node node : tableView.lookupAll(".scroll-bar")) {
+                if (node instanceof ScrollBar scrollBar) {
+                    scrollBar.setVisible(false);
+                    scrollBar.setManaged(false);
+                    scrollBar.setPrefWidth(0);
+                    scrollBar.setMaxWidth(0);
+                    scrollBar.setMinWidth(0);
+                }
+            }
+        });
+    }
+
+    private void updateTableHeight(int visibleRows) {
+        tableView.setPrefHeight(TABLE_HEADER_HEIGHT + (pageSize * TABLE_ROW_HEIGHT));
     }
 
     private void renderPagination(int totalPages) {
