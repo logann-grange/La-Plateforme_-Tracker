@@ -11,11 +11,42 @@ import java.util.List;
 public class StudentModel {
 
     String selectRequest;
+    //String orderRequest;
     List<Object> selectParams;
 
     public StudentModel() {
         this.selectRequest = "";
         this.selectParams = new ArrayList<>();
+        //this.orderRequest = "";
+    }
+
+    public String[] selectAllStudent() {
+        String request = "SELECT * FROM student";
+
+        List<String> results = new ArrayList<>();
+        try {
+            Connection conn = DatabaseConnection.getInstance();
+            PreparedStatement stmt = conn.prepareStatement(request);
+            ResultSet rs = stmt.executeQuery();
+            ResultSetMetaData meta = rs.getMetaData();
+            int columnCount = meta.getColumnCount();
+
+            while (rs.next()) {
+                StringBuilder row = new StringBuilder();
+                for (int i = 1; i <= columnCount; i++) {
+                    if (i > 1) row.append(", ");
+                    row.append(meta.getColumnName(i)).append("=").append(rs.getString(i));
+                }
+                results.add(row.toString());
+            }
+
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return results.toArray(new String[0]);
+
     }
 
     // Ajouter un élève
@@ -164,7 +195,7 @@ public class StudentModel {
         return results.toArray(new String[0]);
     }
 
-    // Trier les élèves (avec ou sans filtre préalable)
+    // Trier les élèves
     public String[] sort(String column, int order) {
         if (this.selectRequest.isEmpty()) {
             this.selectRequest = "SELECT * FROM student";
@@ -213,10 +244,11 @@ public class StudentModel {
         StudentModel model = new StudentModel();
 
         // Trier sans filtre
-        System.out.println(Arrays.toString(model.sort("age", 1)));
+        //System.out.println(Arrays.toString(model.sort("age", 1)));
 
         // Filtrer puis trier
-        model.filter(0, "", "", ">50", "");
-        System.out.println(Arrays.toString(model.sort("grade", 1)));
+        //model.filter(0, "", "", ">50", "");
+        //System.out.println(Arrays.toString(model.sort("grade", 1)));
+        System.out.println(Arrays.toString(model.selectAllStudent()));
     }
 }
