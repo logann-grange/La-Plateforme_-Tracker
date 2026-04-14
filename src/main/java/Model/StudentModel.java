@@ -115,7 +115,8 @@ public class StudentModel {
             PreparedStatement stmt = conn.prepareStatement(request);
             stmt.setObject(1, id);
             stmt.executeUpdate();
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
