@@ -10,7 +10,7 @@ public class loginModel {
 
     private static final String URL  = "jdbc:postgresql://localhost:5432/tracker";
     private static final String USER = "postgres";
-    private static final String PASS = "klemzz135";
+    private static final String PASS = "";
     private static final String PEPPER = System.getenv("PASSWORD_PEPPER");
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12); // coût = 12
 

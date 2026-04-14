@@ -7,7 +7,7 @@ import java.sql.Statement;
 public class creation_table {
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/tracker";
     private static final String DB_USER = "postgres";
-    private static final String DB_PASSWORD = "klemzz135";
+    private static final String DB_PASSWORD = "";
     private static final String ADMIN_DB_URL = "jdbc:postgresql://localhost:5432/postgres";
 
     public static void main(String[] args) {
