@@ -3,6 +3,8 @@ import Vue.Pages.LoginView;
 import Vue.Pages.MainDashboardView;
 import Model.loginModel;
 import javafx.scene.Scene;
+import Controller.StudentController;
+import Model.StudentModel;
 
 public class LoginController {
 
@@ -47,6 +49,11 @@ public class LoginController {
             scene.setRoot(dashboardView.getRoot());
         } else {
             vue.showError("Mail ou mot de passe incorrect");
+        }
+        if (resultat[0] != null) {
+            MainDashboardView dashboardView = new MainDashboardView();
+            new StudentController(dashboardView, new StudentModel(), scene); // ajoute ça
+            scene.setRoot(dashboardView.getRoot());
         }
     }
 }

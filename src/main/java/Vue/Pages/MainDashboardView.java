@@ -29,6 +29,7 @@ public class MainDashboardView {
     private final ActionBar actionBar;
     private final DataTable dataTable;
     private final AdvencedFilterPanel filterPanel;
+    private java.util.function.Consumer<String[]> onAddStudent;
 
     public MainDashboardView() {
         root = new BorderPane();
@@ -87,6 +88,18 @@ public class MainDashboardView {
         return returnButton;
     }
 
+    public DataTable getDataTable() {
+        return dataTable;
+    }
+
+    public ActionBar getActionBar() {
+        return actionBar;
+    }
+
+    public void setOnAddStudent(java.util.function.Consumer<String[]> callback) {
+        this.onAddStudent = callback;
+    }
+
     private void wireActionBarEvents() {
         actionBar.getAddButton().setOnAction(event ->
             openAddStudentWindow()
@@ -95,6 +108,7 @@ public class MainDashboardView {
         actionBar.getSearchField().setOnAction(event ->
             dataTable.searchRows(actionBar.getSearchField().getText())
         );
+
         actionBar.getSearchField().textProperty().addListener((obs, oldValue, newValue) ->
             dataTable.searchRows(newValue)
         );
@@ -207,13 +221,14 @@ public class MainDashboardView {
 
         cancelButton.setOnAction(event -> addStudentStage.close());
         validateButton.setOnAction(event -> {
-            System.out.println(
-                "Ajout eleve (a connecter): "
-                    + firstNameField.getText() + " "
-                    + lastNameField.getText() + ", age="
-                    + ageField.getText() + ", moyenne="
-                    + gradeField.getText()
-            );
+             if (onAddStudent != null) {
+                onAddStudent.accept(new String[]{
+                    firstNameField.getText(),
+                    lastNameField.getText(),
+                    ageField.getText(),
+                    gradeField.getText()
+                });
+            }
             addStudentStage.close();
         });
 
