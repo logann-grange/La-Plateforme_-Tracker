@@ -7,8 +7,8 @@ import Vue.Pages.LoginView;
 import Vue.Pages.MainDashboardView;
 import Vue.Pages.Register;
 import javafx.application.Application;
-import javafx.scene.image.Image;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
@@ -41,7 +41,9 @@ public class MainApp extends Application {
             LoginView view = new LoginView();
             view.getRoot().setStyle(appWindow.getBackgroundStyle());
 
+
             new LoginController(view, new loginModel(), scene, new MainDashboardView());
+            stage.setTitle("Tracker Etudiant");
 
             view.getReturnButton().setOnAction(returnEvent -> {
                 scene.setRoot(authChoiceView.getRoot());

@@ -1,8 +1,9 @@
 package Controller;
+import Model.loginModel;
 import Vue.Pages.LoginView;
 import Vue.Pages.MainDashboardView;
-import Model.loginModel;
 import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 public class LoginController {
 
@@ -45,6 +46,9 @@ public class LoginController {
         if (resultat[0] != null) {
             MainDashboardView dashboardView = new MainDashboardView();
             scene.setRoot(dashboardView.getRoot());
+            if (scene.getWindow() instanceof Stage stage) {
+                stage.setTitle("Tracker Etudiant");
+            }
         } else {
             vue.showError("Mail ou mot de passe incorrect");
         }
