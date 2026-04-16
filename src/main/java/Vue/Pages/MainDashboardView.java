@@ -132,6 +132,28 @@ public class MainDashboardView {
         return returnButton;
     }
 
+    // Compatibilite avec StudentController
+    public DataTable getDataTable() {
+        return dataTable;
+    }
+
+    // Compatibilite avec StudentController (attend String[])
+    public void setOnAddStudent(Consumer<String[]> onAddStudent) {
+        if (onAddStudent == null) {
+            setOnAddStudentSubmitted(null);
+            return;
+        }
+
+        setOnAddStudentSubmitted(data ->
+            onAddStudent.accept(new String[] {
+                data.getFirstName(),
+                data.getLastName(),
+                data.getAge(),
+                data.getAverage()
+            })
+        );
+    }
+
     public void setStudentRows(List<StudentRow> rows) {
         dataTable.setRows(rows == null ? List.of() : rows);
     }

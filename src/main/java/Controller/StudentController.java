@@ -31,10 +31,10 @@ public class StudentController {
 
     private void branchAdd() {
         vue.setOnAddStudent(data -> {
-            String firstName = data[0];
-            String lastName  = data[1];
-            String ageStr    = data[2];
-            String gradeStr  = data[3];
+            String firstName = data[0] == null ? "" : data[0].trim();
+            String lastName  = data[1] == null ? "" : data[1].trim();
+            String ageStr    = data[2] == null ? "" : data[2].trim();
+            String gradeStr  = data[3] == null ? "" : data[3].trim().replace(',', '.');
 
             if (firstName.isEmpty() || lastName.isEmpty() || ageStr.isEmpty() || gradeStr.isEmpty()) {
                 System.out.println("Erreur : tous les champs sont obligatoires.");
@@ -47,7 +47,7 @@ public class StudentController {
                 model.addStudent(firstName, lastName, age, grade);
                 loadStudents();
             } catch (NumberFormatException e) {
-                System.out.println("Erreur : age ou moyenne invalide.");
+                System.out.println("Erreur : age ou moyenne invalide (exemples valides: age=22, moyenne=14.5 ou 14,5).");
             }
         });
     }

@@ -7,7 +7,7 @@ import java.sql.SQLException;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-public class LoginModel {
+public class loginModel {
 
     private static final String PEPPER = System.getenv("PASSWORD_PEPPER");
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
@@ -44,12 +44,12 @@ public class LoginModel {
     }
 
     public String securePassword(String rawPassword) {
-        String pepperedPassword = rawPassword + PEPPER;
+        String pepperedPassword = rawPassword + (PEPPER == null ? "" : PEPPER);
         return encoder.encode(pepperedPassword);
     }
 
     public boolean verifyPassword(String rawPassword, String hashedPassword) {
-        String pepperedPassword = rawPassword + PEPPER;
+        String pepperedPassword = rawPassword + (PEPPER == null ? "" : PEPPER);
         return encoder.matches(pepperedPassword, hashedPassword);
     }
 
@@ -85,7 +85,7 @@ public class LoginModel {
 
     public static void main(String[] args) {
         System.out.println("test main");
-        LoginModel model = new LoginModel();
+        loginModel model = new loginModel();
         //String passwordSecure = model.securePassword("test");
         //System.out.println("mdp : " + passwordSecure);
         //System.out.println(model.verifyPassword("test", passwordSecure));
