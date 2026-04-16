@@ -20,6 +20,7 @@ public class registerController {
         this.vue.getRegisterButton().setOnAction(e -> handleRegister());
     }
 
+    
     private void handleRegister(){
         String email = vue.getEmailField().getText();
         String password = vue.getPasswordField().getText();

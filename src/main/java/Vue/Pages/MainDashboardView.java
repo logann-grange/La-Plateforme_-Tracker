@@ -188,6 +188,7 @@ public class MainDashboardView {
         actionBar.getSearchField().setOnAction(event ->
             dataTable.searchRows(actionBar.getSearchField().getText())
         );
+
         actionBar.getSearchField().textProperty().addListener((obs, oldValue, newValue) ->
             dataTable.searchRows(newValue)
         );
