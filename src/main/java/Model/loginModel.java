@@ -82,13 +82,13 @@ public class LoginModel {
         return result;
     }
 
-    public static void main(String[] args) {
-        System.out.println("test main");
-        LoginModel model = new LoginModel();
-        //String passwordSecure = model.securePassword("test");
-        //System.out.println("mdp : " + passwordSecure);
-        //System.out.println(model.verifyPassword("test", passwordSecure));
-        model.createUser("T" ,"T","t@laplateforme.io", "1");
+    // public static void main(String[] args) {
+    //     System.out.println("test main");
+    //     LoginModel model = new LoginModel();
+    //     //String passwordSecure = model.securePassword("test");
+    //     //System.out.println("mdp : " + passwordSecure);
+    //     //System.out.println(model.verifyPassword("test", passwordSecure));
+    //     model.createUser("T" ,"T","t@laplateforme.io", "1");
 
-    }
+    // }
 }

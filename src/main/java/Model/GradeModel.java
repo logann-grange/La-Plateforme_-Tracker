@@ -4,11 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.Arrays;
-import java.util.List;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class GradeModel {
@@ -69,7 +67,6 @@ public class GradeModel {
         catch (Exception e) {
             e.printStackTrace();
         }
-
         return results.toArray(new String[0]);
     }
 
@@ -129,7 +126,7 @@ public class GradeModel {
     }
 
     // Supprimer une note
-    public void deleteStudent(int id) {
+    public void deleteGrade(int id) {
         String request = "DELETE FROM grade WHERE id = ?";
         try {
             Connection conn = DatabaseConnection.getInstance();
@@ -142,11 +139,11 @@ public class GradeModel {
         }
     }
 
-    //test
-    public static void main(String[] args) {
-        GradeModel model = new GradeModel();
-        //model.insertGrade(1, "subject", 10, LocalDate.of(2026, 3, 10));
-        //System.out.println(Arrays.toString(model.getGrades(1)));
-        model.updateGrade(1, "SUBJECT", 2.2, null);
-    }
+    // //test
+    // public static void main(String[] args) {
+    //     GradeModel model = new GradeModel();
+    //     //model.insertGrade(1, "subject", 10, LocalDate.of(2026, 3, 10));
+    //     //System.out.println(Arrays.toString(model.getGrades(1)));
+    //     model.updateGrade(1, "SUBJECT", 2.2, null);
+    // }
 }

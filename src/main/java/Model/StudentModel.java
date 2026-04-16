@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class StudentModel {
@@ -240,16 +239,17 @@ public class StudentModel {
     }
 
     // Test
-    public static void main(String[] args) {
-        System.out.println("test main");
-        StudentModel model = new StudentModel();
+    // public static void main(String[] args) {
+    //     System.out.println("test main");
+    //     StudentModel model = new StudentModel();
+    //     System.out.println("TEST STUDENT MODEL");
+    //     // Trier sans filtre
+    //     //System.out.println(Arrays.toString(model.sort("age", 1)));
 
-        // Trier sans filtre
-        //System.out.println(Arrays.toString(model.sort("age", 1)));
-
-        // Filtrer puis trier
-        //model.filter(0, "", "", ">50", "");
-        //System.out.println(Arrays.toString(model.sort("grade", 1)));
-        System.out.println(Arrays.toString(model.selectAllStudent()));
-    }
+    //     // Filtrer puis trier
+    //     //model.filter(0, "", "", ">50", "");
+    //     //System.out.println(Arrays.toString(model.sort("grade", 1)));
+    //     //System.out.println(Arrays.toString(model.selectAllStudent()));
+    //     //model.deleteStudent(3);
+    // }
 }
