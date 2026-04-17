@@ -1,12 +1,12 @@
 package Controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Model.StudentModel;
 import Vue.Components.DataTable.StudentRow;
 import Vue.Pages.MainDashboardView;
 import javafx.scene.Scene;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class StudentController {
 
@@ -47,7 +47,7 @@ public class StudentController {
                 model.addStudent(firstName, lastName, age, grade);
                 loadStudents();
             } catch (NumberFormatException e) {
-                System.out.println("Erreur : age ou moyenne invalide (exemples valides: age=22, moyenne=14.5 ou 14,5).");
+                System.out.println("Erreur : age ou moyenne invalide.");
             }
         });
     }

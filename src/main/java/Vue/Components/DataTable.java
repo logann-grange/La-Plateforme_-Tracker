@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ScrollBar;
@@ -36,6 +37,9 @@ public class DataTable {
     private List<StudentRow> allRows;
     private List<String> activeFilters;
     private String currentQuery;
+    private String currentIdFilter;
+    private String currentAgeFilter;
+    private String currentAverageFilter;
     private String currentSortBy;
     private String currentSortOrder;
     private int currentPage;
@@ -61,6 +65,9 @@ public class DataTable {
         this.allRows = new ArrayList<>();
         this.activeFilters = new ArrayList<>();
         this.currentQuery = "";
+        this.currentIdFilter = "";
+        this.currentAgeFilter = "";
+        this.currentAverageFilter = "";
         this.currentSortBy = null;
         this.currentSortOrder = null;
         this.onEdit = row -> {
@@ -164,12 +171,63 @@ public class DataTable {
         recomputeRows();
     }
 
+    public void searchById(String idQuery) {
+        this.currentIdFilter = idQuery == null ? "" : idQuery.trim();
+        currentPage = 1;
+        recomputeRows();
+    }
+
+    public void searchByAge(String ageQuery) {
+        this.currentAgeFilter = ageQuery == null ? "" : ageQuery.trim();
+        currentPage = 1;
+        recomputeRows();
+    }
+
+    public void searchByAverage(String averageQuery) {
+        this.currentAverageFilter = averageQuery == null ? "" : averageQuery.trim();
+        currentPage = 1;
+        recomputeRows();
+    }
+
     private void recomputeRows() {
         List<StudentRow> computedRows = new ArrayList<>();
 
         for (StudentRow row : sourceRows) {
             if (!matchesSelectedOptions(row, activeFilters)) {
                 continue;
+            }
+
+            if (!currentIdFilter.isEmpty()) {
+                try {
+                    int idToMatch = Integer.parseInt(currentIdFilter);
+                    if (row.getId() != idToMatch) {
+                        continue;
+                    }
+                } catch (NumberFormatException exception) {
+                    continue;
+                }
+            }
+
+            if (!currentAgeFilter.isEmpty()) {
+                try {
+                    int ageToMatch = Integer.parseInt(currentAgeFilter);
+                    if (row.getAge() != ageToMatch) {
+                        continue;
+                    }
+                } catch (NumberFormatException exception) {
+                    continue;
+                }
+            }
+
+            if (!currentAverageFilter.isEmpty()) {
+                try {
+                    double averageToMatch = Double.parseDouble(currentAverageFilter);
+                    if (Math.abs(row.getGrade() - averageToMatch) > 0.01) {
+                        continue;
+                    }
+                } catch (NumberFormatException exception) {
+                    continue;
+                }
             }
 
             if (!currentQuery.isEmpty() && !matchesQuery(row, currentQuery)) {
@@ -185,8 +243,7 @@ public class DataTable {
     }
 
     private boolean matchesQuery(StudentRow row, String query) {
-        return String.valueOf(row.getId()).contains(query)
-            || row.getFirstName().toLowerCase().contains(query)
+        return row.getFirstName().toLowerCase().contains(query)
             || row.getLastName().toLowerCase().contains(query)
             || String.valueOf(row.getAge()).contains(query)
             || String.valueOf(row.getGrade()).contains(query)
@@ -348,6 +405,17 @@ public class DataTable {
 
         TableColumn<StudentRow, String> createdAtCol = new TableColumn<>("Cree le");
         createdAtCol.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getCreatedAt()));
+        createdAtCol.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    return;
+                }
+                setText(formatTimestampDisplay(item));
+            }
+        });
 
         TableColumn<StudentRow, Void> actionsCol = new TableColumn<>("Actions");
         actionsCol.setSortable(false);
@@ -478,6 +546,15 @@ public class DataTable {
         clip.widthProperty().bind(region.widthProperty());
         clip.heightProperty().bind(region.heightProperty());
         region.setClip(clip);
+    }
+
+    private String formatTimestampDisplay(String value) {
+        String trimmed = value == null ? "" : value.trim();
+        int dotIndex = trimmed.indexOf('.');
+        if (dotIndex > 0) {
+            return trimmed.substring(0, dotIndex);
+        }
+        return trimmed;
     }
 
     private void renderPagination(int totalPages) {

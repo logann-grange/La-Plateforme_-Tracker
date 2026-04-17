@@ -149,7 +149,8 @@ public class MainDashboardView {
                 data.getFirstName(),
                 data.getLastName(),
                 data.getAge(),
-                data.getAverage()
+                //data.getAverage()
+                "0.0" // on ne peut pas convertir la moyenne en String facilement, et elle n'est pas obligatoire pour l'ajout, donc on passe null    
             })
         );
     }
@@ -213,6 +214,18 @@ public class MainDashboardView {
 
         actionBar.getSearchField().textProperty().addListener((obs, oldValue, newValue) ->
             dataTable.searchRows(newValue)
+        );
+
+        actionBar.getIdSearchField().textProperty().addListener((obs, oldValue, newValue) ->
+            dataTable.searchById(newValue)
+        );
+
+        actionBar.getAgeSearchField().textProperty().addListener((obs, oldValue, newValue) ->
+            dataTable.searchByAge(newValue)
+        );
+
+        actionBar.getAverageSearchField().textProperty().addListener((obs, oldValue, newValue) ->
+            dataTable.searchByAverage(newValue)
         );
 
         actionBar.getStatisticsButton().setOnAction(event ->
@@ -286,8 +299,8 @@ public class MainDashboardView {
         form.add(lastNameField, 1, 1);
         form.add(new LabelCustom("Age", 13, "#334155", true).build(), 0, 2);
         form.add(ageField, 1, 2);
-        form.add(new LabelCustom("Moyenne", 13, "#334155", true).build(), 0, 3);
-        form.add(gradeField, 1, 3);
+        //form.add(new LabelCustom("Moyenne", 13, "#334155", true).build(), 0, 3);
+        //form.add(gradeField, 1, 3);
 
         Button cancelButton = new CustomButton("Annuler", 110, 34, "#64748B").build();
         Button validateButton = new CustomButton("Valider", 110, 34, "#0A84FF").build();
@@ -374,7 +387,7 @@ public class MainDashboardView {
             false
         ).build();
 
-        TextField searchField = new SearchBar("Rechercher une note...", 260, 36, "#FFFFFF", "#0F172A").build();
+        TextField searchField = new SearchBar("Rechercher une note (matiere, date)...", 260, 36, "#FFFFFF", "#0F172A").build();
         searchField.setMaxWidth(Double.MAX_VALUE);
         searchField.setStyle(
             searchField.getStyle()
@@ -418,6 +431,17 @@ public class MainDashboardView {
 
         TableColumn<NoteRow, String> createdAtCol = new TableColumn<>("Ajoute le");
         createdAtCol.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getCreatedAt()));
+        createdAtCol.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    return;
+                }
+                setText(formatTimestampDisplay(item));
+            }
+        });
 
         notesTable.getColumns().addAll(subjectCol, gradeCol, examDateCol, createdAtCol);
         notesTable.getItems().setAll(visibleNotes);
@@ -474,7 +498,11 @@ public class MainDashboardView {
         HBox noteActions = new HBox(10, addNoteButton, editNoteButton, closeButton);
         noteActions.setAlignment(Pos.CENTER_RIGHT);
 
-        VBox contentCard = new VBox(12, title, subtitle, searchField, notesTable, noteActions);
+        HBox searchRow = new HBox(10, searchField);
+        HBox.setHgrow(searchField, Priority.ALWAYS);
+        searchRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox contentCard = new VBox(12, title, subtitle, searchRow, notesTable, noteActions);
         contentCard.setPadding(new Insets(16));
         contentCard.setStyle(
             "-fx-background-color: rgba(255,255,255,0.90);"
@@ -509,6 +537,7 @@ public class MainDashboardView {
         String query
     ) {
         String normalizedQuery = query == null ? "" : query.trim().toLowerCase();
+
         visibleNotes.setAll(
             allNotes.stream()
                 .filter(note -> normalizedQuery.isEmpty()
@@ -681,6 +710,15 @@ public class MainDashboardView {
             note.getExamDate(),
             note.getCreatedAt()
         );
+    }
+
+    private String formatTimestampDisplay(String value) {
+        String trimmed = value == null ? "" : value.trim();
+        int dotIndex = trimmed.indexOf('.');
+        if (dotIndex > 0) {
+            return trimmed.substring(0, dotIndex);
+        }
+        return trimmed;
     }
 
     private List<NoteRow> toNoteRows(int fallbackStudentId, List<NoteFormData> sourceNotes) {
