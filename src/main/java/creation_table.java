@@ -33,7 +33,7 @@ public class creation_table {
                 grade FLOAT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-            """;
+            """; 
 
         String noteSql = """
             CREATE TABLE IF NOT EXISTS grade (
