@@ -52,7 +52,7 @@ public class DatabaseConnection {
                 stmt.setObject(i + 1, params[i]);
             }
             ResultSet result = stmt.executeQuery();
-            conn.close();
+            close();
             return result;
         } 
         catch (Exception e) {
@@ -70,7 +70,7 @@ public class DatabaseConnection {
                 stmt.setObject(i + 1, params[i]);
             }
             int result = stmt.executeUpdate();
-            conn.close();
+            close();
             return result;
         } 
         catch (Exception e) {
