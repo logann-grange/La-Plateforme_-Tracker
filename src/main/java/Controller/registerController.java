@@ -1,4 +1,5 @@
 package Controller;
+import Model.LoginModel;
 import Vue.Pages.AuthChoiceView;
 import Vue.Pages.Register;
 import Model.loginModel;
