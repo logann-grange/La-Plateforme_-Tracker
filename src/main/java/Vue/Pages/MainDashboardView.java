@@ -2,6 +2,9 @@ package Vue.Pages;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import Vue.Components.ActionBar;
 import Vue.Components.AdvencedFilterPanel;
 import Vue.Components.CustomButton;
@@ -10,28 +13,28 @@ import Vue.Components.DataTable.StudentRow;
 import Vue.Components.LabelCustom;
 import Vue.Components.SearchBar;
 import Vue.Components.StatisticsPanel;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 
 public class MainDashboardView {
     private final BorderPane root;
@@ -40,10 +43,35 @@ public class MainDashboardView {
     private final DataTable dataTable;
     private final AdvencedFilterPanel filterPanel;
 
+    private Consumer<StudentFormData> onAddStudentSubmitted;
+    private Consumer<StudentRow> onEditStudentRequested;
+    private Consumer<StudentRow> onDeleteStudentRequested;
+    private Consumer<NoteFormData> onNoteCreated;
+    private Consumer<NoteFormData> onNoteUpdated;
+    private Consumer<Integer> onStudentNotesRequested;
+    private Function<Integer, List<NoteFormData>> studentNotesProvider;
+    private java.util.function.Consumer<String[]> onImport;
+    private java.util.function.Consumer<String[]> onExport;
+
     public MainDashboardView() {
         root = new BorderPane();
         root.setPadding(new Insets(16));
         root.setStyle("-fx-background-color: transparent;");
+
+        onAddStudentSubmitted = data -> {
+        };
+        onEditStudentRequested = row -> {
+        };
+        onDeleteStudentRequested = row -> {
+        };
+        onNoteCreated = data -> {
+        };
+        onNoteUpdated = data -> {
+        };
+        onStudentNotesRequested = studentId -> {
+        };
+        studentNotesProvider = studentId -> List.of();
+        
 
         returnButton = new CustomButton("Retour", 110, 34, "#475569").build();
         Label title = new LabelCustom("Gestion des eleves", 24, "#0F172A", true).build();
@@ -64,10 +92,13 @@ public class MainDashboardView {
         );
 
         dataTable = new DataTable(8);
-        dataTable.setRows(createMockRows());
-        dataTable.setOnEdit(row -> System.out.println("Modifier eleve ID=" + row.getId()));
-        dataTable.setOnDelete(row -> System.out.println("Suppression confirmee ID=" + row.getId()));
-        dataTable.setOnGradeClick(this::openStudentNotesWindow);
+        dataTable.setRows(List.of());
+        dataTable.setOnEdit(row -> onEditStudentRequested.accept(row));
+        dataTable.setOnDelete(row -> onDeleteStudentRequested.accept(row));
+        dataTable.setOnGradeClick(row -> {
+            onStudentNotesRequested.accept(row.getId());
+            openStudentNotesWindow(row);
+        });
 
         filterPanel = new AdvencedFilterPanel(
             new String[] {"Age 18-25", "Age 26-35", "Age 36-45", "Admis >=10", "Echec <10", "Excellent >=16"},
@@ -98,6 +129,76 @@ public class MainDashboardView {
         return returnButton;
     }
 
+    public ActionBar getActionBar() {
+        return this.actionBar;
+    }
+
+    // Compatibilite avec StudentController
+    public DataTable getDataTable() {
+        return dataTable;
+    }
+
+    // Compatibilite avec StudentController (attend String[])
+    public void setOnAddStudent(Consumer<String[]> onAddStudent) {
+        if (onAddStudent == null) {
+            setOnAddStudentSubmitted(null);
+            return;
+        }
+
+        setOnAddStudentSubmitted(data ->
+            onAddStudent.accept(new String[] {
+                data.getFirstName(),
+                data.getLastName(),
+                data.getAge(),
+                data.getAverage()
+            })
+        );
+    }
+
+    public void setStudentRows(List<StudentRow> rows) {
+        dataTable.setRows(rows == null ? List.of() : rows);
+    }
+
+    public void setOnAddStudentSubmitted(Consumer<StudentFormData> onAddStudentSubmitted) {
+        this.onAddStudentSubmitted = onAddStudentSubmitted == null ? data -> {
+        } : onAddStudentSubmitted;
+    }
+
+    public void setOnEditStudentRequested(Consumer<StudentRow> onEditStudentRequested) {
+        this.onEditStudentRequested = onEditStudentRequested == null ? row -> {
+        } : onEditStudentRequested;
+    }
+
+    public void setOnDeleteStudentRequested(Consumer<StudentRow> onDeleteStudentRequested) {
+        this.onDeleteStudentRequested = onDeleteStudentRequested == null ? row -> {
+        } : onDeleteStudentRequested;
+    }
+
+    public void setOnImport(java.util.function.Consumer<String[]> callback) {
+        this.onImport = callback;
+    }
+    public void setOnExport(java.util.function.Consumer<String[]> callback) {
+        this.onExport = callback;
+    }
+    public void setOnNoteCreated(Consumer<NoteFormData> onNoteCreated) {
+        this.onNoteCreated = onNoteCreated == null ? data -> {
+        } : onNoteCreated;
+    }
+
+    public void setOnNoteUpdated(Consumer<NoteFormData> onNoteUpdated) {
+        this.onNoteUpdated = onNoteUpdated == null ? data -> {
+        } : onNoteUpdated;
+    }
+
+    public void setOnStudentNotesRequested(Consumer<Integer> onStudentNotesRequested) {
+        this.onStudentNotesRequested = onStudentNotesRequested == null ? studentId -> {
+        } : onStudentNotesRequested;
+    }
+
+    public void setStudentNotesProvider(Function<Integer, List<NoteFormData>> studentNotesProvider) {
+        this.studentNotesProvider = studentNotesProvider == null ? studentId -> List.of() : studentNotesProvider;
+    }
+
     private void wireActionBarEvents() {
         actionBar.getAddButton().setOnAction(event ->
             openAddStudentWindow()
@@ -106,6 +207,7 @@ public class MainDashboardView {
         actionBar.getSearchField().setOnAction(event ->
             dataTable.searchRows(actionBar.getSearchField().getText())
         );
+
         actionBar.getSearchField().textProperty().addListener((obs, oldValue, newValue) ->
             dataTable.searchRows(newValue)
         );
@@ -115,11 +217,11 @@ public class MainDashboardView {
         );
 
         actionBar.getImportButton().setOnAction(event ->
-            System.out.println("Action test: Importer des donnees")
+            openImportFormatWindow()
         );
 
         actionBar.getExportButton().setOnAction(event ->
-            System.out.println("Action test: Exporter des donnees")
+            openExportFormatWindow()
         );
     }
 
@@ -218,12 +320,13 @@ public class MainDashboardView {
 
         cancelButton.setOnAction(event -> addStudentStage.close());
         validateButton.setOnAction(event -> {
-            System.out.println(
-                "Ajout eleve (a connecter): "
-                    + firstNameField.getText() + " "
-                    + lastNameField.getText() + ", age="
-                    + ageField.getText() + ", moyenne="
-                    + gradeField.getText()
+            onAddStudentSubmitted.accept(
+                new StudentFormData(
+                    firstNameField.getText(),
+                    lastNameField.getText(),
+                    ageField.getText(),
+                    gradeField.getText()
+                )
             );
             addStudentStage.close();
         });
@@ -250,7 +353,8 @@ public class MainDashboardView {
     }
 
     private void openStudentNotesWindow(StudentRow student) {
-        ObservableList<NoteRow> allNotes = FXCollections.observableArrayList(createMockNotesForStudent(student.getId()));
+        List<NoteFormData> sourceNotes = studentNotesProvider.apply(student.getId());
+        ObservableList<NoteRow> allNotes = FXCollections.observableArrayList(toNoteRows(student.getId(), sourceNotes));
         ObservableList<NoteRow> visibleNotes = FXCollections.observableArrayList(allNotes);
         final String[] currentQuery = {""};
 
@@ -339,6 +443,7 @@ public class MainDashboardView {
             }
 
             allNotes.add(newNote);
+            onNoteCreated.accept(toNoteFormData(newNote));
             refreshVisibleNotes(allNotes, visibleNotes, notesTable, currentQuery[0]);
         });
 
@@ -359,6 +464,7 @@ public class MainDashboardView {
                 allNotes.set(selectedIndex, updatedNote);
             }
 
+            onNoteUpdated.accept(toNoteFormData(updatedNote));
             refreshVisibleNotes(allNotes, visibleNotes, notesTable, currentQuery[0]);
         });
 
@@ -564,35 +670,31 @@ public class MainDashboardView {
         alert.showAndWait();
     }
 
-    private List<NoteRow> createMockNotesForStudent(int studentId) {
-        List<NoteRow> notes = new ArrayList<>();
-
-        notes.add(new NoteRow(studentId, "Maths", 14.5, "2026-03-28", "2026-04-01 10:20"));
-        notes.add(new NoteRow(studentId, "Francais", 12.0, "2026-03-25", "2026-04-01 10:21"));
-        notes.add(new NoteRow(studentId, "Histoire", 15.0, "2026-03-20", "2026-04-01 10:22"));
-        notes.add(new NoteRow(studentId, "Physique", 13.5, "2026-03-18", "2026-04-01 10:23"));
-
-        return notes;
+    private NoteFormData toNoteFormData(NoteRow note) {
+        return new NoteFormData(
+            note.getStudentId(),
+            note.getSubject(),
+            note.getGrade(),
+            note.getExamDate(),
+            note.getCreatedAt()
+        );
     }
 
-    private List<StudentRow> createMockRows() {
-        List<StudentRow> rows = new ArrayList<>();
-        rows.add(new StudentRow(1, "Lina", "Martin", 17, 14.5, "2026-04-01 10:00"));
-        rows.add(new StudentRow(2, "Noah", "Petit", 18, 9.2, "2026-04-01 10:03"));
-        rows.add(new StudentRow(3, "Emma", "Bernard", 20, 16.8, "2026-04-01 10:07"));
-        rows.add(new StudentRow(4, "Adam", "Robert", 16, 11.0, "2026-04-01 10:10"));
-        rows.add(new StudentRow(5, "Ines", "Richard", 19, 7.8, "2026-04-01 10:12"));
-        rows.add(new StudentRow(6, "Leo", "Dubois", 21, 13.3, "2026-04-01 10:15"));
-        rows.add(new StudentRow(7, "Maya", "Moreau", 18, 17.4, "2026-04-01 10:19"));
-        rows.add(new StudentRow(8, "Sami", "Simon", 17, 10.1, "2026-04-01 10:22"));
-        rows.add(new StudentRow(9, "Jade", "Laurent", 22, 15.0, "2026-04-01 10:25"));
-        rows.add(new StudentRow(10, "Yanis", "Michel", 19, 8.4, "2026-04-01 10:30"));
-        rows.add(new StudentRow(11, "Nora", "Garcia", 18, 12.6, "2026-04-01 10:34"));
-        rows.add(new StudentRow(12, "Ilyes", "Roux", 17, 16.1, "2026-04-01 10:38"));
-        rows.add(new StudentRow(13, "Sara", "Fournier", 20, 18.0, "2026-04-01 10:42"));
-        rows.add(new StudentRow(14, "Amine", "Girard", 16, 6.9, "2026-04-01 10:46"));
-        rows.add(new StudentRow(15, "Yara", "Andre", 19, 11.5, "2026-04-01 10:50"));
-        return rows;
+    private List<NoteRow> toNoteRows(int fallbackStudentId, List<NoteFormData> sourceNotes) {
+        List<NoteRow> notes = new ArrayList<>();
+        if (sourceNotes == null) {
+            return notes;
+        }
+
+        for (NoteFormData note : sourceNotes) {
+            if (note == null) {
+                continue;
+            }
+            int studentId = note.getStudentId() > 0 ? note.getStudentId() : fallbackStudentId;
+            notes.add(new NoteRow(studentId, note.getSubject(), note.getGrade(), note.getExamDate(), note.getCreatedAt()));
+        }
+
+        return notes;
     }
 
     private static class NoteRow {
@@ -629,5 +731,125 @@ public class MainDashboardView {
         public String getCreatedAt() {
             return createdAt;
         }
+    }
+
+    public static class StudentFormData {
+        private final String firstName;
+        private final String lastName;
+        private final String age;
+        private final String average;
+
+        public StudentFormData(String firstName, String lastName, String age, String average) {
+            this.firstName = firstName == null ? "" : firstName;
+            this.lastName = lastName == null ? "" : lastName;
+            this.age = age == null ? "" : age;
+            this.average = average == null ? "" : average;
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public String getAge() {
+            return age;
+        }
+
+        public String getAverage() {
+            return average;
+        }
+    }
+
+    public static class NoteFormData {
+        private final int studentId;
+        private final String subject;
+        private final double grade;
+        private final String examDate;
+        private final String createdAt;
+
+        public NoteFormData(int studentId, String subject, double grade, String examDate, String createdAt) {
+            this.studentId = studentId;
+            this.subject = subject == null ? "" : subject;
+            this.grade = grade;
+            this.examDate = examDate == null ? "" : examDate;
+            this.createdAt = createdAt == null ? "" : createdAt;
+        }
+
+        public int getStudentId() {
+            return studentId;
+        }
+
+        public String getSubject() {
+            return subject;
+        }
+
+        public double getGrade() {
+            return grade;
+        }
+
+        public String getExamDate() {
+            return examDate;
+        }
+
+        public String getCreatedAt() {
+            return createdAt;
+        }
+    }
+
+    private void openImportFormatWindow() {
+        Stage formatStage = new Stage();
+        formatStage.setTitle("Importer");
+        formatStage.setResizable(false);
+        formatStage.initModality(Modality.APPLICATION_MODAL);
+        if (root.getScene().getWindow() != null) formatStage.initOwner(root.getScene().getWindow());
+
+        Label label = new Label("Choisissez un format :");
+        Button csvBtn  = new Button("CSV");
+        Button xmlBtn  = new Button("XML");
+        Button jsonBtn = new Button("JSON");
+
+        csvBtn.setOnAction(e  -> { formatStage.close(); onImport.accept(new String[] { "csv" }); });
+        xmlBtn.setOnAction(e  -> { formatStage.close(); onImport.accept(new String[] { "xml" }); });
+        jsonBtn.setOnAction(e -> { formatStage.close(); onImport.accept(new String[] { "json" }); });
+
+        HBox buttons = new HBox(12, csvBtn, xmlBtn, jsonBtn);
+        buttons.setAlignment(Pos.CENTER);
+
+        VBox content = new VBox(16, label, buttons);
+        content.setPadding(new Insets(20));
+        content.setAlignment(Pos.CENTER);
+
+        formatStage.setScene(new Scene(content, 300, 120));
+        formatStage.showAndWait();
+    }
+
+    private void openExportFormatWindow() {
+        Stage formatStage = new Stage();
+        formatStage.setTitle("Exporter");
+        formatStage.setResizable(false);
+        formatStage.initModality(Modality.APPLICATION_MODAL);
+        if (root.getScene().getWindow() != null) formatStage.initOwner(root.getScene().getWindow());
+
+        Label label = new Label("Choisissez un format :");
+        Button csvBtn  = new Button("CSV");
+        Button xmlBtn  = new Button("XML");
+        Button jsonBtn = new Button("JSON");
+
+        csvBtn.setOnAction(e  -> { formatStage.close(); onExport.accept(new String[]{ "csv" }); });
+        xmlBtn.setOnAction(e  -> { formatStage.close(); onExport.accept(new String[]{ "xml" }); });
+        jsonBtn.setOnAction(e -> { formatStage.close(); onExport.accept(new String[]{ "json" }); });
+
+        HBox buttons = new HBox(12, csvBtn, xmlBtn, jsonBtn);
+        buttons.setAlignment(Pos.CENTER);
+
+        VBox content = new VBox(16, label, buttons);
+        content.setPadding(new Insets(20));
+        content.setAlignment(Pos.CENTER);
+
+        formatStage.setScene(new Scene(content, 300, 120));
+        formatStage.showAndWait();
     }
 }

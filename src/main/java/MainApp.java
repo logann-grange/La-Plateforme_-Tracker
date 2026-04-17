@@ -41,7 +41,9 @@ public class MainApp extends Application {
             LoginView view = new LoginView();
             view.getRoot().setStyle(appWindow.getBackgroundStyle());
 
+
             new LoginController(view, new LoginModel(), scene, new MainDashboardView());
+            stage.setTitle("Tracker Etudiant");
 
             view.getReturnButton().setOnAction(returnEvent -> {
                 scene.setRoot(authChoiceView.getRoot());

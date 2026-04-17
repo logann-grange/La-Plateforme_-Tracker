@@ -1,7 +1,7 @@
 package Controller;
+import Model.LoginModel;
 import Vue.Pages.AuthChoiceView;
 import Vue.Pages.Register;
-import Model.LoginModel;
 import javafx.scene.Scene;
 
 public class registerController {
@@ -20,6 +20,7 @@ public class registerController {
         this.vue.getRegisterButton().setOnAction(e -> handleRegister());
     }
 
+    
     private void handleRegister(){
         String email = vue.getEmailField().getText();
         String password = vue.getPasswordField().getText();
