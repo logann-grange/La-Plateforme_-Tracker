@@ -35,6 +35,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+
 public class MainDashboardView {
     private final BorderPane root;
     private final Button returnButton;
@@ -45,12 +46,12 @@ public class MainDashboardView {
     private Consumer<StudentFormData> onAddStudentSubmitted;
     private Consumer<StudentRow> onEditStudentRequested;
     private Consumer<StudentRow> onDeleteStudentRequested;
-    private Runnable onImportRequested;
-    private Runnable onExportRequested;
     private Consumer<NoteFormData> onNoteCreated;
     private Consumer<NoteFormData> onNoteUpdated;
     private Consumer<Integer> onStudentNotesRequested;
     private Function<Integer, List<NoteFormData>> studentNotesProvider;
+    private java.util.function.Consumer<String[]> onImport;
+    private java.util.function.Consumer<String[]> onExport;
 
     public MainDashboardView() {
         root = new BorderPane();
@@ -62,10 +63,6 @@ public class MainDashboardView {
         onEditStudentRequested = row -> {
         };
         onDeleteStudentRequested = row -> {
-        };
-        onImportRequested = () -> {
-        };
-        onExportRequested = () -> {
         };
         onNoteCreated = data -> {
         };
@@ -132,6 +129,10 @@ public class MainDashboardView {
         return returnButton;
     }
 
+    public ActionBar getActionBar() {
+        return this.actionBar;
+    }
+
     // Compatibilite avec StudentController
     public DataTable getDataTable() {
         return dataTable;
@@ -173,16 +174,12 @@ public class MainDashboardView {
         } : onDeleteStudentRequested;
     }
 
-    public void setOnImportRequested(Runnable onImportRequested) {
-        this.onImportRequested = onImportRequested == null ? () -> {
-        } : onImportRequested;
+    public void setOnImport(java.util.function.Consumer<String[]> callback) {
+        this.onImport = callback;
     }
-
-    public void setOnExportRequested(Runnable onExportRequested) {
-        this.onExportRequested = onExportRequested == null ? () -> {
-        } : onExportRequested;
+    public void setOnExport(java.util.function.Consumer<String[]> callback) {
+        this.onExport = callback;
     }
-
     public void setOnNoteCreated(Consumer<NoteFormData> onNoteCreated) {
         this.onNoteCreated = onNoteCreated == null ? data -> {
         } : onNoteCreated;
@@ -220,11 +217,11 @@ public class MainDashboardView {
         );
 
         actionBar.getImportButton().setOnAction(event ->
-            onImportRequested.run()
+            openImportFormatWindow()
         );
 
         actionBar.getExportButton().setOnAction(event ->
-            onExportRequested.run()
+            openExportFormatWindow()
         );
     }
 
@@ -800,5 +797,59 @@ public class MainDashboardView {
         public String getCreatedAt() {
             return createdAt;
         }
+    }
+
+    private void openImportFormatWindow() {
+        Stage formatStage = new Stage();
+        formatStage.setTitle("Importer");
+        formatStage.setResizable(false);
+        formatStage.initModality(Modality.APPLICATION_MODAL);
+        if (root.getScene().getWindow() != null) formatStage.initOwner(root.getScene().getWindow());
+
+        Label label = new Label("Choisissez un format :");
+        Button csvBtn  = new Button("CSV");
+        Button xmlBtn  = new Button("XML");
+        Button jsonBtn = new Button("JSON");
+
+        csvBtn.setOnAction(e  -> { formatStage.close(); onImport.accept(new String[] { "csv" }); });
+        xmlBtn.setOnAction(e  -> { formatStage.close(); onImport.accept(new String[] { "xml" }); });
+        jsonBtn.setOnAction(e -> { formatStage.close(); onImport.accept(new String[] { "json" }); });
+
+        HBox buttons = new HBox(12, csvBtn, xmlBtn, jsonBtn);
+        buttons.setAlignment(Pos.CENTER);
+
+        VBox content = new VBox(16, label, buttons);
+        content.setPadding(new Insets(20));
+        content.setAlignment(Pos.CENTER);
+
+        formatStage.setScene(new Scene(content, 300, 120));
+        formatStage.showAndWait();
+    }
+
+    private void openExportFormatWindow() {
+        Stage formatStage = new Stage();
+        formatStage.setTitle("Exporter");
+        formatStage.setResizable(false);
+        formatStage.initModality(Modality.APPLICATION_MODAL);
+        if (root.getScene().getWindow() != null) formatStage.initOwner(root.getScene().getWindow());
+
+        Label label = new Label("Choisissez un format :");
+        Button csvBtn  = new Button("CSV");
+        Button xmlBtn  = new Button("XML");
+        Button jsonBtn = new Button("JSON");
+
+        csvBtn.setOnAction(e  -> { formatStage.close(); onExport.accept(new String[]{ "csv" }); });
+        xmlBtn.setOnAction(e  -> { formatStage.close(); onExport.accept(new String[]{ "xml" }); });
+        jsonBtn.setOnAction(e -> { formatStage.close(); onExport.accept(new String[]{ "json" }); });
+
+        HBox buttons = new HBox(12, csvBtn, xmlBtn, jsonBtn);
+        buttons.setAlignment(Pos.CENTER);
+
+        VBox content = new VBox(16, label, buttons);
+        content.setPadding(new Insets(20));
+        content.setAlignment(Pos.CENTER);
+
+        formatStage.setScene(new Scene(content, 300, 120));
+        formatStage.showAndWait();
     }
 }
