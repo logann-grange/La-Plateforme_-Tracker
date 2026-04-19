@@ -15,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+// Vue de connexion utilisateur (email et mot de passe).
 public class LoginView {
 
 	private final BorderPane root;

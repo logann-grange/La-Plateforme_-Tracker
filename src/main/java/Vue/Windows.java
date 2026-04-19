@@ -2,6 +2,7 @@ package Vue;
 
 import java.util.regex.Pattern;
 
+// Configure la fenetre principale de l'application (taille et theme).
 public class Windows {
     private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$");
 

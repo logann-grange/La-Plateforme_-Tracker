@@ -1,8 +1,10 @@
 package Vue.Components;
 
 import java.util.regex.Pattern;
+
 import javafx.scene.control.TextField;
 
+// Champ texte personnalise pour les formulaires de l'application.
 public class TextZone {
     private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$");
 

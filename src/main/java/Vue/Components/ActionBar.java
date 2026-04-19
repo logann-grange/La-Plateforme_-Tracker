@@ -8,6 +8,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
+// Barre d'actions du dashboard (ajout, recherche, import/export, stats).
 public class ActionBar {
     private final Button addButton;
     private final Button statisticsButton;

@@ -42,7 +42,7 @@ public class MainApp extends Application {
             view.getRoot().setStyle(appWindow.getBackgroundStyle());
 
 
-            new LoginController(view, new LoginModel(), scene, new MainDashboardView());
+            new LoginController(view, new loginModel(), scene, new MainDashboardView());
             stage.setTitle("Tracker Etudiant");
 
             view.getReturnButton().setOnAction(returnEvent -> {

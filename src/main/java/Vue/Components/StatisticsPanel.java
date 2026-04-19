@@ -3,6 +3,7 @@ package Vue.Components;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
 import Vue.Components.DataTable.StudentRow;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
+// Panneau qui calcule et affiche les statistiques des eleves.
 public class StatisticsPanel {
     private final String title;
     private final String backgroundColor;

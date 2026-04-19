@@ -3,6 +3,7 @@ package Vue.Components;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ComboBox;
 
+// Composant de menu deroulant reutilisable pour la selection d'options.
 public class dropDownMenu {
     private final String[] options;
     private final String backgroundColor;

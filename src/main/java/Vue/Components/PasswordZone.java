@@ -1,8 +1,10 @@
 package Vue.Components;
 
-import javafx.scene.control.PasswordField;
 import java.util.regex.Pattern;
 
+import javafx.scene.control.PasswordField;
+
+// Zone de saisie de mot de passe avec style commun.
 public class PasswordZone {
     private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$");
 

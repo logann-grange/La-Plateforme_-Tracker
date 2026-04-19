@@ -30,7 +30,7 @@ public class creation_table {
                 first_name VARCHAR(255) NOT NULL,
                 last_name VARCHAR(255) NOT NULL,
                 age INT NOT NULL,
-                grade FLOAT NOT NULL,
+                grade NUMERIC(4,2) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """; 
@@ -40,11 +40,14 @@ public class creation_table {
                 id SERIAL PRIMARY KEY,
                 student_id INT NOT NULL REFERENCES student(id) ON DELETE CASCADE,
                 subject VARCHAR(100) NOT NULL,
-                grade FLOAT NOT NULL,
+                grade NUMERIC(4,2) NOT NULL,
                 exam_date DATE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """;
+
+        String migrateStudentGradeSql = "ALTER TABLE student ALTER COLUMN grade TYPE NUMERIC(4,2) USING ROUND(grade::numeric, 2)";
+        String migrateNoteGradeSql = "ALTER TABLE grade ALTER COLUMN grade TYPE NUMERIC(4,2) USING ROUND(grade::numeric, 2)";
 
         String userSql = """
             CREATE TABLE IF NOT EXISTS users (
@@ -70,6 +73,8 @@ public class creation_table {
             statement.execute(sql);
             statement.execute(noteSql);
             statement.execute(userSql);
+            statement.execute(migrateStudentGradeSql);
+            statement.execute(migrateNoteGradeSql);
             System.out.println("Table 'student' creee ou deja existante.");
             System.out.println("Table 'note' creee ou deja existante.");
             System.out.println("Table 'users' creee ou deja existante.");

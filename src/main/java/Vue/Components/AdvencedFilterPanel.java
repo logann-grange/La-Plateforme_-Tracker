@@ -2,11 +2,13 @@ package Vue.Components;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.VBox;
 
+// Panneau de filtres avances applique au tableau des eleves.
 public class AdvencedFilterPanel {
     private final String[] filterOptions;
     private final String backgroundColor;

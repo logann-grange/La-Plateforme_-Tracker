@@ -2,6 +2,7 @@ package Vue.Components;
 
 import javafx.scene.control.Button;
 
+// Fabrique de boutons styles pour harmoniser l'interface.
 public class CustomButton {
     private final String text;
     private final double width;

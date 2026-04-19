@@ -5,6 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
+// Composant de pagination pour naviguer entre les pages du tableau.
 public class PaginationBar {
     private final int currentPage;
     private final int totalPages;

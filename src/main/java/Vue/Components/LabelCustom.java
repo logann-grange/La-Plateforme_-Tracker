@@ -2,6 +2,7 @@ package Vue.Components;
 
 import javafx.scene.control.Label;
 
+// Fabrique de labels styles pour uniformiser la typographie.
 public class LabelCustom {
 	private final String text;
 	private final double fontSize;

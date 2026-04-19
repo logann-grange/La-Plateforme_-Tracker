@@ -36,6 +36,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 
+// Vue principale du dashboard: eleves, filtres, statistiques et notes.
 public class MainDashboardView {
     private final BorderPane root;
     private final Button returnButton;
@@ -93,7 +94,7 @@ public class MainDashboardView {
 
         dataTable = new DataTable(8);
         dataTable.setRows(List.of());
-        dataTable.setOnEdit(row -> onEditStudentRequested.accept(row));
+        dataTable.setOnEdit(this::openEditStudentWindow);
         dataTable.setOnDelete(row -> onDeleteStudentRequested.accept(row));
         dataTable.setOnGradeClick(row -> {
             onStudentNotesRequested.accept(row.getId());
@@ -201,6 +202,7 @@ public class MainDashboardView {
     }
 
     private void wireActionBarEvents() {
+        // Regroupe tous les branchements UI -> actions du tableau/dashboard.
         actionBar.getAddButton().setOnAction(event ->
             openAddStudentWindow()
         );
@@ -347,6 +349,140 @@ public class MainDashboardView {
         addStudentStage.showAndWait();
     }
 
+    private void openEditStudentWindow(StudentRow row) {
+        Label title = new LabelCustom("Modifier un eleve", 22, "#0F172A", true).build();
+        Label subtitle = new LabelCustom("Mets a jour les informations de l'eleve", 13, "#64748B", false).build();
+
+        TextField firstNameField = new TextField(row.getFirstName());
+        firstNameField.setPromptText("Prenom");
+        firstNameField.setPrefWidth(230);
+        firstNameField.setStyle(
+            "-fx-background-color: #FFFFFF;"
+                + "-fx-border-color: #CBD5E1;"
+                + "-fx-border-radius: 8;"
+                + "-fx-background-radius: 8;"
+                + "-fx-padding: 8 10;"
+        );
+
+        TextField lastNameField = new TextField(row.getLastName());
+        lastNameField.setPromptText("Nom");
+        lastNameField.setPrefWidth(230);
+        lastNameField.setStyle(
+            "-fx-background-color: #FFFFFF;"
+                + "-fx-border-color: #CBD5E1;"
+                + "-fx-border-radius: 8;"
+                + "-fx-background-radius: 8;"
+                + "-fx-padding: 8 10;"
+        );
+
+        TextField ageField = new TextField(String.valueOf(row.getAge()));
+        ageField.setPromptText("Age");
+        ageField.setPrefWidth(230);
+        ageField.setStyle(
+            "-fx-background-color: #FFFFFF;"
+                + "-fx-border-color: #CBD5E1;"
+                + "-fx-border-radius: 8;"
+                + "-fx-background-radius: 8;"
+                + "-fx-padding: 8 10;"
+        );
+
+        TextField gradeField = new TextField(String.valueOf(row.getGrade()));
+        gradeField.setPromptText("Moyenne (0-20)");
+        gradeField.setPrefWidth(230);
+        gradeField.setStyle(
+            "-fx-background-color: #FFFFFF;"
+                + "-fx-border-color: #CBD5E1;"
+                + "-fx-border-radius: 8;"
+                + "-fx-background-radius: 8;"
+                + "-fx-padding: 8 10;"
+        );
+
+        GridPane form = new GridPane();
+        form.setHgap(12);
+        form.setVgap(12);
+        form.setAlignment(Pos.CENTER);
+        form.add(new LabelCustom("Prenom", 13, "#334155", true).build(), 0, 0);
+        form.add(firstNameField, 1, 0);
+        form.add(new LabelCustom("Nom", 13, "#334155", true).build(), 0, 1);
+        form.add(lastNameField, 1, 1);
+        form.add(new LabelCustom("Age", 13, "#334155", true).build(), 0, 2);
+        form.add(ageField, 1, 2);
+        form.add(new LabelCustom("Moyenne", 13, "#334155", true).build(), 0, 3);
+        form.add(gradeField, 1, 3);
+
+        Button cancelButton = new CustomButton("Annuler", 110, 34, "#64748B").build();
+        Button validateButton = new CustomButton("Enregistrer", 130, 34, "#0A84FF").build();
+        HBox actions = new HBox(12, cancelButton, validateButton);
+        actions.setAlignment(Pos.CENTER);
+        actions.setPadding(new Insets(4, 0, 0, 0));
+
+        VBox formCard = new VBox(form);
+        formCard.setPadding(new Insets(14));
+        formCard.setStyle(
+            "-fx-background-color: #F8FAFC;"
+                + "-fx-border-color: #E2E8F0;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 10;"
+        );
+
+        VBox content = new VBox(14, title, subtitle, formCard, actions);
+        content.setPadding(new Insets(20));
+        content.setAlignment(Pos.TOP_CENTER);
+        content.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #FFFFFF, #F1F5F9);"
+        );
+
+        Stage editStudentStage = new Stage();
+        editStudentStage.setTitle("Modifier un eleve");
+        editStudentStage.setScene(new Scene(content, 500, 430));
+        editStudentStage.setResizable(false);
+        editStudentStage.initModality(Modality.APPLICATION_MODAL);
+
+        if (root.getScene() != null) {
+            editStudentStage.initOwner(root.getScene().getWindow());
+        }
+
+        cancelButton.setOnAction(event -> editStudentStage.close());
+        validateButton.setOnAction(event -> {
+            String firstName = firstNameField.getText() == null ? "" : firstNameField.getText().trim();
+            String lastName = lastNameField.getText() == null ? "" : lastNameField.getText().trim();
+            String ageText = ageField.getText() == null ? "" : ageField.getText().trim();
+            String gradeText = gradeField.getText() == null ? "" : gradeField.getText().trim().replace(',', '.');
+
+            if (firstName.isBlank() || lastName.isBlank() || ageText.isBlank() || gradeText.isBlank()) {
+                showStudentAlert("Champs requis", "Tous les champs eleve sont obligatoires.");
+                return;
+            }
+
+            int age;
+            double grade;
+            try {
+                age = Integer.parseInt(ageText);
+                grade = Double.parseDouble(gradeText);
+            } catch (NumberFormatException exception) {
+                showStudentAlert("Valeurs invalides", "Age ou moyenne invalide.");
+                return;
+            }
+
+            if (age <= 0) {
+                showStudentAlert("Age invalide", "L'age doit etre superieur a 0.");
+                return;
+            }
+
+            if (grade < 0 || grade > 20) {
+                showStudentAlert("Moyenne invalide", "La moyenne doit etre comprise entre 0 et 20.");
+                return;
+            }
+
+            onEditStudentRequested.accept(
+                new StudentRow(row.getId(), firstName, lastName, age, grade, row.getCreatedAt())
+            );
+            editStudentStage.close();
+        });
+
+        editStudentStage.showAndWait();
+    }
+
     private void openStatisticsWindow() {
         StatisticsPanel statisticsPanel = new StatisticsPanel("Statistiques des eleves", "#FFFFFF", "#1A1A1A");
         statisticsPanel.setRows(dataTable.getFilteredRows());
@@ -366,6 +502,7 @@ public class MainDashboardView {
     }
 
     private void openStudentNotesWindow(StudentRow student) {
+        // Recupere les notes depuis le provider (alimente par le controleur).
         List<NoteFormData> sourceNotes = studentNotesProvider.apply(student.getId());
         ObservableList<NoteRow> allNotes = FXCollections.observableArrayList(toNoteRows(student.getId(), sourceNotes));
         ObservableList<NoteRow> visibleNotes = FXCollections.observableArrayList(allNotes);
@@ -394,6 +531,7 @@ public class MainDashboardView {
                 + "-fx-background-radius: 9;"
         );
 
+        // Configure le tableau des notes (colonnes, rendu, style).
         TableView<NoteRow> notesTable = new TableView<>();
         notesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         notesTable.setPlaceholder(new LabelCustom("Aucune note pour cet eleve.", 13, "#64748B", false).build());
@@ -461,6 +599,7 @@ public class MainDashboardView {
         Button closeButton = new CustomButton("Fermer", 120, 34, "#334155").build();
 
         addNoteButton.setOnAction(event -> {
+            // Ouvre le formulaire en mode creation, puis pousse la note vers le callback.
             NoteRow newNote = openNoteFormWindow(student, null);
             if (newNote == null) {
                 return;
@@ -472,6 +611,7 @@ public class MainDashboardView {
         });
 
         editNoteButton.setOnAction(event -> {
+            // Ouvre le formulaire en mode edition pour la note selectionnee.
             NoteRow selectedNote = notesTable.getSelectionModel().getSelectedItem();
             if (selectedNote == null) {
                 showNoteAlert("Selection requise", "Selectionne d'abord une note a modifier.");
@@ -533,6 +673,7 @@ public class MainDashboardView {
         TableView<NoteRow> notesTable,
         String query
     ) {
+        // Applique un filtre texte local sans refaire un appel backend.
         String normalizedQuery = query == null ? "" : query.trim().toLowerCase();
 
         visibleNotes.setAll(
@@ -547,6 +688,7 @@ public class MainDashboardView {
     }
 
     private NoteRow openNoteFormWindow(StudentRow student, NoteRow existingNote) {
+        // Le meme formulaire sert pour l'ajout et la modification selon existingNote.
         boolean isEdit = existingNote != null;
 
         Label title = new LabelCustom(
@@ -655,6 +797,7 @@ public class MainDashboardView {
 
         cancelButton.setOnAction(event -> formStage.close());
         saveButton.setOnAction(event -> {
+            // Validation minimale avant de retourner une note exploitable.
             String subject = subjectField.getText() == null ? "" : subjectField.getText().trim();
             String gradeText = gradeField.getText() == null ? "" : gradeField.getText().trim();
             String examDate = examDateField.getText() == null ? "" : examDateField.getText().trim();
@@ -692,6 +835,14 @@ public class MainDashboardView {
     }
 
     private void showNoteAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showStudentAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);

@@ -5,12 +5,16 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import Model.GradeModel;
 import Model.StudentModel;
 import Vue.Components.DataTable.StudentRow;
 import Vue.Pages.MainDashboardView;
+import Vue.Pages.MainDashboardView.NoteFormData;
 import javafx.scene.Scene;
 import javafx.stage.FileChooser;
 
@@ -18,16 +22,23 @@ public class StudentController {
 
     private final MainDashboardView vue;
     private final StudentModel model;
+    private final GradeModel gradeModel;
     private final Scene scene;
 
     public StudentController(MainDashboardView vue, StudentModel model, Scene scene) {
+        this(vue, model, new GradeModel(), scene);
+    }
+
+    public StudentController(MainDashboardView vue, StudentModel model, GradeModel gradeModel, Scene scene) {
         this.vue = vue;
         this.model = model;
+        this.gradeModel = gradeModel;
         this.scene = scene;
 
         loadStudents();
         branchAdd();
         branchEditDelete();
+        branchNotes();
         branchOnExport();
         branchOnImport();
     }
@@ -69,7 +80,7 @@ public class StudentController {
     }
 
     private void branchEditDelete() {
-        vue.getDataTable().setOnEdit(row -> {
+        vue.setOnEditStudentRequested(row -> {
             model.updateStudent(
                 row.getId(),
                 row.getFirstName(),
@@ -80,10 +91,123 @@ public class StudentController {
             loadStudents();
         });
 
-        vue.getDataTable().setOnDelete(row -> {
+        vue.setOnDeleteStudentRequested(row -> {
             model.deleteStudent(row.getId());
             loadStudents();
         });
+    }
+
+    private void branchNotes() {
+        vue.setOnNoteCreated(this::addNote);
+        vue.setStudentNotesProvider(this::loadNotesForStudent);
+    }
+
+    private void addNote(NoteFormData note) {
+        if (note == null) {
+            return;
+        }
+
+        String subject = note.getSubject().trim();
+        if (subject.isEmpty() || note.getExamDate().trim().isEmpty()) {
+            System.out.println("Erreur : sujet et date de la note sont obligatoires.");
+            return;
+        }
+
+        try {
+            LocalDate examDate = LocalDate.parse(note.getExamDate().trim());
+            gradeModel.insertGrade(note.getStudentId(), subject, note.getGrade(), examDate);
+            updateStudentAverage(note.getStudentId());
+        } catch (DateTimeParseException e) {
+            System.out.println("Erreur : date de note invalide (format attendu YYYY-MM-DD).");
+        }
+    }
+
+    private void updateStudentAverage(int studentId) {
+        Double average = calculateStudentAverage(studentId);
+        if (average == null) {
+            return;
+        }
+
+        model.updateStudentAverage(studentId, average);
+        loadStudents();
+    }
+
+    private Double calculateStudentAverage(int studentId) {
+        String[] results = gradeModel.selectAllGrade();
+        double sum = 0.0;
+        int count = 0;
+
+        for (String result : results) {
+            try {
+                String[] parts = result.split(", ");
+                int currentStudentId = 0;
+                double grade = 0.0;
+
+                for (String part : parts) {
+                    String[] kv = part.split("=", 2);
+                    if (kv.length < 2) {
+                        continue;
+                    }
+
+                    switch (kv[0].trim()) {
+                        case "student_id" -> currentStudentId = Integer.parseInt(kv[1].trim());
+                        case "grade" -> grade = Double.parseDouble(kv[1].trim());
+                    }
+                }
+
+                if (currentStudentId == studentId) {
+                    sum += grade;
+                    count++;
+                }
+            } catch (Exception e) {
+                System.out.println("Erreur calcul moyenne pour l'eleve " + studentId + " : " + result);
+            }
+        }
+
+        if (count == 0) {
+            return null;
+        }
+
+        return sum / count;
+    }
+
+    private List<NoteFormData> loadNotesForStudent(int studentId) {
+        String[] results = gradeModel.selectAllGrade();
+        List<NoteFormData> notes = new ArrayList<>();
+
+        for (String result : results) {
+            try {
+                String[] parts = result.split(", ");
+                int currentStudentId = 0;
+                String subject = "";
+                double grade = 0;
+                String examDate = "";
+                String createdAt = "";
+
+                for (String part : parts) {
+                    String[] kv = part.split("=", 2);
+                    if (kv.length < 2) {
+                        continue;
+                    }
+
+                    switch (kv[0].trim()) {
+                        case "student_id" -> currentStudentId = Integer.parseInt(kv[1].trim());
+                        case "subject" -> subject = kv[1].trim();
+                        case "grade" -> grade = Double.parseDouble(kv[1].trim());
+                        case "exam_date" -> examDate = kv[1].trim();
+                        case "created_at" -> createdAt = kv[1].trim();
+                    }
+                }
+
+                if (currentStudentId == studentId) {
+                    notes.add(new NoteFormData(currentStudentId, subject, grade, examDate, createdAt));
+                }
+            } catch (Exception e) {
+                System.out.println("Erreur parsing note : " + result);
+            }
+        }
+
+        return notes;
     }
     
     public void openFileChooser(String format, boolean isImport) {

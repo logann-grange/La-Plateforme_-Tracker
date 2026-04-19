@@ -2,6 +2,7 @@ package Vue.Components;
 
 import javafx.scene.control.TextField;
 
+// Champ de recherche personnalise reutilisable dans les vues.
 public class SearchBar {
     private final String placeholder;
     private final double width;

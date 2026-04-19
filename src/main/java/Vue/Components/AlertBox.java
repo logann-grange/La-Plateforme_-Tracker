@@ -2,6 +2,7 @@ package Vue.Components;
 
 import javafx.scene.control.Alert;
 
+// Fenetre d'alerte simple pour afficher des messages utilisateur.
 public class AlertBox {
     private final String title;
     private final String headerText;

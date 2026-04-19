@@ -82,6 +82,15 @@ public class StudentModel {
         DatabaseConnection.executeUpdate(request, params.toArray());
     }
 
+    // Met à jour uniquement la moyenne d'un élève
+    public void updateStudentAverage(int id, double average) {
+        DatabaseConnection.executeUpdate(
+            "UPDATE student SET grade = ? WHERE id = ?",
+            average,
+            id
+        );
+    }
+
     // Supprimer un élève
     public void deleteStudent(int id) {
         DatabaseConnection.executeUpdate("DELETE FROM student WHERE id = ?", id);

@@ -2,6 +2,7 @@ package Vue.Components;
 
 import java.util.regex.Pattern;
 
+// Composant utilitaire pour parametrer une fenetre JavaFX.
 public class Windows {
     private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$");
 

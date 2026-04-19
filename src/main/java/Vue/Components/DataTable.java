@@ -24,6 +24,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
+// Tableau principal des eleves avec tri, filtres et pagination.
 public class DataTable {
     private static final double TABLE_ROW_HEIGHT = 36;
     private static final double TABLE_HEADER_HEIGHT = 30;

@@ -1,8 +1,7 @@
 package Controller;
-import Model.LoginModel;
+import Model.loginModel;
 import Vue.Pages.AuthChoiceView;
 import Vue.Pages.Register;
-import Model.loginModel;
 import javafx.scene.Scene;
 
 public class registerController {

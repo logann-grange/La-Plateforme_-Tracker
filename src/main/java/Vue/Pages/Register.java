@@ -15,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+// Vue d'inscription pour creer un nouveau compte utilisateur.
 public class Register {
     private final BorderPane root;
     private final Label title;
