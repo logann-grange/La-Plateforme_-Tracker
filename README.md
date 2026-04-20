@@ -28,12 +28,6 @@ La base de données doit s'appeler `tracker`.
 
 ## Installation des dépendances
 
-Les dépendances sont gérées par Maven (`pom.xml`). Aucune installation manuelle n'est nécessaire.
-
-```powershell
-.\mvnw.cmd clean test
-```
-
 Dépendances utilisées :
 
 - `org.openjfx:javafx-controls` / `javafx-fxml`
