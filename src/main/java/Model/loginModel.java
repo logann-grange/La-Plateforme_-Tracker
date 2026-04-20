@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-public class loginModel {
+public class LoginModel {
 
     private static final String PEPPER = System.getenv("PASSWORD_PEPPER");
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);

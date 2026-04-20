@@ -1,7 +1,6 @@
 package Model;
 
 import java.util.Arrays;
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
@@ -57,5 +56,11 @@ public class StudentModelTest {
         StudentModel model = new StudentModel();
         System.out.println(Arrays.toString(model.filter(1, "test3", "TEST3", "45", "20")));
         System.out.println(Arrays.toString(model.sort("grade", 1)));
+    }
+
+    @Test
+    void testUpdateStudentAverage() {
+        StudentModel model = new StudentModel();
+        model.updateStudentAverage(2, 20);
     }
 }

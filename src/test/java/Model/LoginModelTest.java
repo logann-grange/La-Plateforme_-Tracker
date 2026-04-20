@@ -5,14 +5,14 @@ import org.junit.jupiter.api.Test;
 public class LoginModelTest {
     @Test
     void testCreateUser() {
-        loginModel model = new loginModel();
+        LoginModel model = new LoginModel();
         model.createUser("Test", "Model", "test.model@laplateforme.io", "test");
     }
 
     @Test
     void testLogin() {
-        loginModel model = new loginModel();
-        model.login("test.model@laplateforme.io", "test");
+        LoginModel model = new LoginModel();
+        model.login("d@d.com", "Mdp_1234567");
         
     }
 }

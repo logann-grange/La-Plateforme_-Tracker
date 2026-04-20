@@ -1,6 +1,6 @@
 import Controller.LoginController;
-import Controller.registerController;
-import Model.loginModel;
+import Controller.RegisterController;
+import Model.LoginModel;
 import Vue.Components.Windows;
 import Vue.Pages.AuthChoiceView;
 import Vue.Pages.LoginView;
@@ -26,7 +26,7 @@ public class MainApp extends Application {
             Register view = new Register();
             view.getRoot().setStyle(appWindow.getBackgroundStyle());
 
-            new registerController(view, new loginModel(), scene, authChoiceView);
+            new RegisterController(view, new LoginModel(), scene, authChoiceView);
 
             view.getReturnButton().setOnAction(returnEvent -> {
                 scene.setRoot(authChoiceView.getRoot());
@@ -42,7 +42,7 @@ public class MainApp extends Application {
             view.getRoot().setStyle(appWindow.getBackgroundStyle());
 
 
-            new LoginController(view, new loginModel(), scene, new MainDashboardView());
+            new LoginController(view, new LoginModel(), scene, new MainDashboardView());
             stage.setTitle("Tracker Etudiant");
 
             view.getReturnButton().setOnAction(returnEvent -> {

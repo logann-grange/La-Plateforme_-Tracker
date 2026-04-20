@@ -1,17 +1,17 @@
 package Controller;
-import Model.loginModel;
+import Model.LoginModel;
 import Vue.Pages.AuthChoiceView;
 import Vue.Pages.Register;
 import javafx.scene.Scene;
 
-public class registerController {
+public class RegisterController {
     
     private Register vue;
-    private loginModel model;
+    private LoginModel model;
     private Scene scene;
     private AuthChoiceView authChoiceView;
 
-    public registerController(Register vue, loginModel model, Scene scene, AuthChoiceView authChoiceView) {
+    public RegisterController(Register vue, LoginModel model, Scene scene, AuthChoiceView authChoiceView) {
         this.vue = vue;
         this.model = model;
         this.scene = scene;

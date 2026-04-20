@@ -1,6 +1,6 @@
 package Controller;
+import Model.LoginModel;
 import Model.StudentModel;
-import Model.loginModel;
 import Vue.Pages.LoginView;
 import Vue.Pages.MainDashboardView;
 import javafx.scene.Scene;
@@ -9,11 +9,11 @@ import javafx.stage.Stage;
 public class LoginController {
 
     private LoginView vue;
-    private loginModel model;
+    private LoginModel model;
     private Scene scene;
     private MainDashboardView dashboardView;
 
-    public LoginController(LoginView vue, loginModel model, Scene scene, MainDashboardView dashboardView) {
+    public LoginController(LoginView vue, LoginModel model, Scene scene, MainDashboardView dashboardView) {
         this.vue = vue;
         this.model = model;
         this.scene = scene;
