@@ -40,6 +40,36 @@ public class registerController {
             return;
         }
 
+        if (password.length()<8){
+            vue.showError("Le mot de passe doit contenir au moins 8 caractères.");
+            return;
+        }
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            vue.showError("Adresse email invalide.");
+            return;
+        }
+
+        if (password.matches("^[A-Za-z0-9]+$")) {
+            vue.showError("Le mot de passe doit contenir au moins un caractère spécial.");
+            return;
+        }
+
+        if (!password.matches(".*[A-Z].*")) {
+            vue.showError("Le mot de passe doit contenir au moins une lettre majuscule.");
+            return;
+        }
+
+        if (!password.matches(".*[a-z].*")) {
+            vue.showError("Le mot de passe doit contenir au moins une lettre minuscule.");
+            return;
+        }
+
+        if(!password.matches(".*\\d.*")) {
+            vue.showError("Le mot de passe doit contenir au moins un chiffre.");
+            return;
+        }
+
         boolean created = model.createUser(firstName, lastName, email, password);
         if (!created) {
             String dbError = model.getLastErrorMessage();
