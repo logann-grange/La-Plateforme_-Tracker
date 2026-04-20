@@ -43,6 +43,7 @@ public class DatabaseConnection {
         
     }
 
+    // execute une requete Select
     public static ResultSet executeQuery(String request, Object... params) {
         try {
             Connection conn = getInstance();
@@ -61,6 +62,7 @@ public class DatabaseConnection {
         }
     }
 
+    // execute une requete insert / update / delete
     public static int executeUpdate(String request, Object... params) {
         try {
             Connection conn = getInstance();

@@ -9,6 +9,7 @@ import java.util.List;
 
 public class GradeModel {
 
+    // renvoie une liste à partir des resultat d'une requete
     private String[] resultSetToArray(ResultSet rs) {
         List<String> results = new ArrayList<>();
         try {
@@ -59,15 +60,18 @@ public class GradeModel {
         String request = "UPDATE grade SET ";
         List<Object> params = new ArrayList<>();
 
+        // modif du sujet
         if (!subject.isEmpty()) {
             request += "subject = ?";
             params.add(subject);
         }
+        // modif de la note
         if (grade != 0) {
             if (!params.isEmpty()) request += ", ";
             request += "grade = ?";
             params.add(grade);
         }
+        // modif de la date
         if (date != null) {
             if (!params.isEmpty()) request += ", ";
             request += "exam_date = ?";

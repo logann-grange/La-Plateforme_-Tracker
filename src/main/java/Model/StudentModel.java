@@ -92,18 +92,22 @@ public class StudentModel {
         this.selectParams = new ArrayList<>();
         this.selectRequest = "SELECT * FROM student WHERE 1=1";
 
+        // filtrage par id
         if (id != 0) {
             this.selectRequest += " AND id = ?";
             this.selectParams.add(id);
         }
+        // filtrage par par prenom
         if (firstName != null && !firstName.isEmpty()) {
             this.selectRequest += " AND first_name = ?";
             this.selectParams.add(firstName);
         }
+        // filtrage par nom
         if (lastName != null && !lastName.isEmpty()) {
             this.selectRequest += " AND last_name = ?";
             this.selectParams.add(lastName);
         }
+        // filtrage par age
         if (age != null && !age.isEmpty()) {
             if (age.startsWith("<")) {
                 this.selectRequest += " AND age < ?";
@@ -116,6 +120,7 @@ public class StudentModel {
                 this.selectParams.add(Integer.parseInt(age.trim()));
             }
         }
+        // filtrage par note
         if (grade != null && !grade.isEmpty()) {
             if (grade.startsWith("<")) {
                 this.selectRequest += " AND grade < ?";
